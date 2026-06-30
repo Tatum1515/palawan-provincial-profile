@@ -10,7 +10,7 @@ import PrintPaySlip from './pages/PrintPaySlip.jsx'
 import LoginForm from './components/LoginForm.jsx'
 import { Toaster } from "react-hot-toast"
 import LoginLanding from "./pages/LoginLanding"
-import { Layout } from "lucide-react"
+import Layout from './pages/Layout.jsx'
 
 const App = () => {
   return (
