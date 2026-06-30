@@ -1,4 +1,3 @@
-
 const LoginLeftSide = () => {
   return (
         <div className="hidden md:flex w-1/2 bg-indigo-950 
