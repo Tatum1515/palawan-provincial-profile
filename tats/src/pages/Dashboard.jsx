@@ -3,6 +3,7 @@ import { dummyAdminDashboardData } from "../assets/assets"
 import Loading from "../components/Loading"
 import AdminDashboard from "../components/AdminDashboard"
 import EmployeeDashboard from "../components/EmployeeDashboard"
+// import { dummyEmployeeDashboardData } from "../assets/assets"
 
 const Dashboard = () => {
   const [data, setData] = useState(null)
