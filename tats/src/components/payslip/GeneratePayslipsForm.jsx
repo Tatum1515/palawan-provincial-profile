@@ -16,6 +16,12 @@ const GeneratePayslipsForm = ({employees, onSuccess}) => {
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        setLoading(true);
+        setTimeout(()=>{
+            setLoading(false);
+            setIsOpen(false);
+            onSuccess?.();
+        }, 1000)
     }
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -26,12 +32,12 @@ const GeneratePayslipsForm = ({employees, onSuccess}) => {
                     <X size={20}/>
                 </button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4"></form>
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {/* select employee */}
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Employee</label>
                     <select name="employeeId" required>
-                        {employees.map((e)=>(
+                        {(employees || []).map((e)=>(
                             <option key={e.id} value={e.id}>
                                 {e.firstName} {e.lastName} ({e.position})
                             </option>
@@ -63,11 +69,11 @@ const GeneratePayslipsForm = ({employees, onSuccess}) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Allowances</label>
-                    <input type="number" name="allowances" defaultValue="0" />  
+                    <input type="number" name="allowances" defaultValue={0} />  
                     </div>
                     <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Deductions</label>
-                    <input type="number" name="deductions" defaultValue="0" />  
+                    <input type="number" name="deductions" defaultValue={0} />  
                     </div>
 
                 </div>
@@ -88,6 +94,7 @@ const GeneratePayslipsForm = ({employees, onSuccess}) => {
 
                 </div>
 
+            </form>
         </div>
 
     </div>

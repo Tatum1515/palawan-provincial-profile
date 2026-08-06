@@ -6,7 +6,7 @@ import Attendance from './pages/Attendance.jsx'
 import Leave from './pages/Leave.jsx'
 import Payslip from './pages/Payslip.jsx'
 import Settings from './pages/Settings.jsx'
-import PrintPaySlip from './pages/PrintPaySlip.jsx'
+import PrintPaySlip from './pages/PrintPayslip.jsx'
 import LoginForm from './components/LoginForm.jsx'
 import { Toaster } from "react-hot-toast"
 import LoginLanding from "./pages/LoginLanding"

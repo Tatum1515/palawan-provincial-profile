@@ -3,28 +3,22 @@ import { dummyEmployeeData, dummyPayslipData} from "../assets/assets"
 import Loading from "../components/Loading"
 import PayslipList from "../components/payslip/PayslipList"
 import GeneratePayslipsForm from "../components/payslip/GeneratePayslipsForm"
-
+  
 const Payslip = () => {
 
-  const [payslips, setPayslips] = useState([])
-  const [employees, setEmployees] = useState([])
+  const isAdmin = true;
+  const [payslips, setPayslips] = useState(dummyPayslipData)
+  const [employees] = useState(isAdmin ? dummyEmployeeData : [])
   const [loading, setLoading] = useState(true);
-  const isAdmin= true;
 
   const fetchPayslips = useCallback(async ()=>{
     setPayslips(dummyPayslipData)
-    setTimeout(() => {
-      setLoading(false);
-    },1000);
   },[])
 
   useEffect(()=>{
-    fetchPayslips()
-  },[fetchPayslips])
-
-    useEffect(()=>{
-    if(isAdmin) setEmployees(dummyEmployeeData)
-  },[isAdmin])
+    const t = setTimeout(()=> setLoading(false), 1000)
+    return () => clearTimeout(t)
+  },[])
 
 if(loading) return <Loading/>
 
