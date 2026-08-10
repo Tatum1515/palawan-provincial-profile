@@ -4,7 +4,7 @@ import { clockInout, getAttendance } from "../controllers/attendanceController.j
 
 const attendanceRouter = Router();
 
-attendanceRouter.post('/', protect, clockInout)
-attendanceRouter.post('/', protect, getAttendance)
+attendanceRouter.post('/', protect, clockInout);
+attendanceRouter.get('/', protect, getAttendance);
 
 export default attendanceRouter;
