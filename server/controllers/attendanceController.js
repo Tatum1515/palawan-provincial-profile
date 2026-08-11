@@ -7,7 +7,7 @@ import Employee from "../models/Employee.js";
 export const clockInout = async (req, res) => {
     try{
         const session =req.session;
-        const employee = await Employee.findOne({userId:session.userId})
+        const employee = await Employee.findOne({userID: session.id})
         if (!employee) return res.status(404).json({error: "Employee not found"});
         if(employee.isDeleted)return res.status(403).json({error: "Your account is deactivated",});
 
@@ -77,7 +77,7 @@ export const clockInout = async (req, res) => {
 export const getAttendance = async (req, res) => {
     try{
         const session =req.session;
-        const employee = await Employee.findOne({userId:session.userId})
+        const employee = await Employee.findOne({userID: session.id})
         if (!employee) return res.status(404).json({error: "Employee not found"});
 
         const limit = parseInt(req.query.limit || 30);

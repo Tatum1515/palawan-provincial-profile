@@ -40,14 +40,14 @@ const autoCheckOut = inngest.createFunction(
         })
 
         //after 10 hours, mark attendance as checkout with status "late"
-        await step.sleepUntil("wait-for-the-1-hour" , new Date().getTime() + 1 *60*60*1000 )
+        await step.sleepUntil("wait-for-the-1-hour", new Date(Date.now() + 1 * 60 * 60 * 1000))
 
         attendance = await Attendance.findById(attendanceId)
         if(!attendance?.checkOut){
-             attendance.checkOut = new Date(attendance.checkIn).getTime() + 4 *60*60*1000;
+             attendance.checkOut = new Date(new Date(attendance.checkIn).getTime() + 4 * 60 * 60 * 1000);
              attendance.workingHours = 4;
              attendance.dayType = "Half Day";
-             attendance.status = "Late";
+             attendance.status = "LATE";
              await attendance.save();
         }
     }
@@ -119,10 +119,12 @@ const AttendanceReminderCron = inngest.createFunction(
     })
 
     //step 4 get employeeIDS who already checked in today
-    const checkInIds= await Attendance.find({
-        date: { $gte: new Date(today.startUTC), $lt: new Date(today.endUTC)},
-    }).lean();
-    return attendance.map((a) => a.employeeId.toString())
+    const checkInIds = await step.run("get-check-in-ids", async () => {
+        const attendance = await Attendance.find({
+            date: { $gte: new Date(today.startUTC), $lt: new Date(today.endUTC)},
+        }).lean();
+        return attendance.map((record) => record.employeeId.toString());
+    });
 
     //step 5 filter absent employees (not on leave &n not checked in)
     const absentEmployees = activeEmployees.filter((emp) =>
@@ -131,9 +133,9 @@ const AttendanceReminderCron = inngest.createFunction(
     //step 6 send reminder emails
     if (absentEmployees.length > 0 ){
         await step.run("send-reminder-emails", async ()=>{
-            const emailPromises = absentEmployees.map((emp)=> {
+            await Promise.all(absentEmployees.map((emp)=> {
                 //send email
-                sendEmail({
+                return sendEmail({
                     to:emp.email,
                     subject:`Attendance Reminder - Please mark your attendance`,
                     body: `<div style="max-width: 600px; font-family: Arial, sans-serif;">
@@ -148,10 +150,11 @@ const AttendanceReminderCron = inngest.createFunction(
                                 <p style="font-size: 16px;"><strong>QuickEMS</strong></p>
                             </div>`
 
-                })
-            })
+                });
+            }));
         })
     }
+
     return{totalActive: activeEmployees.length, onLeave: onLeaveIds.length, checkIn: checkInIds.length, absent: absentEmployees.length }
     }
 );

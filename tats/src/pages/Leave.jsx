@@ -1,25 +1,47 @@
 import { useCallback, useEffect, useState } from "react"
 import Loading from "../components/Loading"
-import { dummyLeaveData } from "../assets/assets"
 import { PalmtreeIcon, PlusIcon, ThermometerIcon, UmbrellaIcon } from "lucide-react"
 import LeaveHistory from "../components/leave/LeaveHistory"
 import ApplyLeaveModal from "../components/leave/ApplyLeaveModal"
+import { useAuth } from "../context/AuthContext"
+import toast from "react-hot-toast"
+import api from "../api/axios.js"
+
 
 const Leave = () => {
+  const {user} = useAuth()
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
-  const isAdmin = false;
+  const isAdmin = user?.role === "ADMIN";
 
-  const fetchLeaves = useCallback (()=> {
-    setLeaves(dummyLeaveData)
-    setTimeout(()=> {
-      setLoading(false);
-    },1000);
+  const fetchLeaves = useCallback (async()=> {
+    try{
+      const res = await api.get('/leaves');
+      setLeaves(res.data.data || [])
+      if(res.data.employee?.isDeleted) setIsDeleted(true)
+    }catch (error){
+      toast.error(error?.response?.data?.error || error.message)
+
+    } finally {
+      setLoading(false)
+    }
+
   },[])
 
+  const updateLeaveStatus = async (id, status) => {
+    try {
+      await api.post(`/leaves/${id}`, { status });
+      toast.success(`Leave request ${status.toLowerCase()}`);
+      await fetchLeaves();
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || "Unable to update leave request");
+    }
+  }
+
   useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLeaves()
   },[fetchLeaves])
 
@@ -75,7 +97,7 @@ const annualCount = approvedLeaves.filter((l)=>l.type === "ANNUAL").length;
         </div>
       )}
 
-      <LeaveHistory leaves={leaves} isAdmin={isAdmin} onUpdate={fetchLeaves}/>
+      <LeaveHistory leaves={leaves} isAdmin={isAdmin} onUpdate={updateLeaveStatus}/>
       <ApplyLeaveModal open={showModal} onClose={() => setShowModal (false)} onSuccess={fetchLeaves}/>
 
 

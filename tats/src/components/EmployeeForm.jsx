@@ -2,6 +2,9 @@ import {useNavigate} from "react-router-dom"
 import {useState} from "react"
 import { DEPARTMENTS } from "../assets/assets"
 import { Loader2Icon } from "lucide-react"
+import api from "../api/axios.js"
+import toast from "react-hot-toast"
+
 
 const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
     const navigate = useNavigate()
@@ -9,6 +12,22 @@ const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
     const isEditMode = !!initialData;
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
+        const formData = new FormData(e.currentTarget);
+        if(isEditMode){
+            const pwd = formData.get("password")
+            if (!pwd) formData.delete("password")
+        }
+        try{
+            const url = isEditMode ? `/employees/${initialData.id}` : "/employees";
+            const method = isEditMode ? "put" : "post";
+            await api [method] (url, formData)
+            onSuccess ? onSuccess() : navigate("/employees")
+        } catch (error){
+            toast.error(error.response?.data?.error || error.message || "Unable to save employee")
+        } finally{
+            setLoading(false);
+        }
     }
 
   return (
@@ -84,8 +103,8 @@ const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
                     <label className="block mb-2"> Status</label>
                     <select name="employmentStatus"defaultValue=
                     {initialData?.employmentStatus} >
-                        <option value = "Active">Active</option>
-                        <option value = "Inactive">Inactive</option>
+                        <option value = "ACTIVE">Active</option>
+                        <option value = "INACTIVE">Inactive</option>
                     </select>
                     </div>
                 )}
@@ -99,7 +118,7 @@ const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
                     <label className="block mb-2"> Work Mail</label>
                     <input type="email" name="email" required defaultValue={initialData?.email} />
                 </div>
-                {!isEditMode && (
+                {isEditMode && (
                     <div>
                         <label className="block mb-2">
                             Temporary Password
@@ -120,9 +139,9 @@ const EmployeeForm = ({initialData, onSuccess, onCancel}) => {
                         <label className="block mb-2">
                             System Role
                         </label>
-                        <select name="role" defaultValue={initialData?.role || "EMPLOYEE"}>
-                            <option value="Employee">Employee</option>
-                            <option value="Admin">Admin</option>
+                        <select name="role" defaultValue={initialData?.user?.role || "EMPLOYEE"}>
+                            <option value="EMPLOYEE">Employee</option>
+                            <option value="ADMIN">Admin</option>
                         </select>
                     </div>
             </div>

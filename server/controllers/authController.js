@@ -50,7 +50,7 @@ export const login = async (req, res) => {
 //Get /api/auth/session
 export const getSession = async (req, res) => {
     const session = req.session;
-    return res.json({session});
+    return res.json({user: session});
 }
 
 //change password for employee and admin

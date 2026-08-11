@@ -7,9 +7,9 @@ import LeaveApplication from "../models/LeaveApplication.js";
 export const createLeave = async (req,res) =>{
     try{
         const session =req.session; 
-        const employee = await Employee.findOne({userId: session.userId})
+        const employee = await Employee.findOne({userID: session.id})
         if(!employee) return res.status(404).json({error:"Employee not found"});
-        if(employee,isDeleted){
+        if(employee.isDeleted){
             return res.status(403).json({
                 error: "Your account is deactivated. You cannot apply for leave.",
             })
@@ -72,10 +72,10 @@ export const getLeaves = async(req, res) =>{
                     employeeId: obj.employeeId?._id?.toString(),    
                 }
             })
-            return res.json({})
+            return res.json({data})
         } else {
             const employee = await Employee.findOne({
-                userId: session.userId,
+                userID: session.id,
             }).lean();
             if(!employee) return res.status(404).json({error: "Not found"});
             const leaves = await LeaveApplication.find({

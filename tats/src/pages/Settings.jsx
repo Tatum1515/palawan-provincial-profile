@@ -1,23 +1,34 @@
 import { useEffect, useState } from "react"
-import { dummyProfileData} from "../assets/assets"
 import Loading from "../components/Loading"
 import { Lock } from "lucide-react";
 import ProfileForm from "../components/ProfileForm";
 import { ChangePasswordModal } from "../components/ChangePasswordModal";
+import toast from "react-hot-toast";
+import api from "../api/axios.js";
 
 const Settings = () => {
 
-  const [profile, setProfile] = useState(dummyProfileData)
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
 
   const fetchProfile = async () => {
-    setProfile(dummyProfileData)
+    try{
+      const res = await api.get("/profile")
+      const profile = res.data;
+      if(profile) setProfile(profile)
+    }catch (err) {
+      toast.error(err?.response?.data?.error || err?.message)
+      
+    }finally{
+      setLoading(false)
+
+    }
   }
 
   useEffect(()=>{
-    const t = setTimeout(() => setLoading(false), 1000)
-    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProfile()
   },[])
 
   if(loading) return <Loading/>

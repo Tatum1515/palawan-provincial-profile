@@ -7,7 +7,7 @@ export const createPayslip = async (req,res) =>{
     try{
         const{employeeId, month, year, basicSalary, allowances, deductions} = req.body;
 
-        if(!employeeId || !month | !year | !basicSalary){
+        if(!employeeId || !month || !year || !basicSalary){
             return res.status(400).json({error: "Missing fields"});
         }
 
@@ -51,7 +51,7 @@ export const getPayslip = async(req, res) =>{
             })
             return res.json({data});
         } else {
-            const employee = await Employee.findOne({userId: session.userId})
+            const employee = await Employee.findOne({userID: session.id})
             if (!employee) return res.status(404).json({error: "Not Found"});
             const payslips = await Payslip.find({employeeId:employee._id}).
             sort({ createdAt: -1});

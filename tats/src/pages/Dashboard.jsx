@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react"
-import { dummyAdminDashboardData } from "../assets/assets"
 import Loading from "../components/Loading"
 import AdminDashboard from "../components/AdminDashboard"
 import EmployeeDashboard from "../components/EmployeeDashboard"
-// import { dummyEmployeeDashboardData } from "../assets/assets"
+import api from "../api/axios.js"
+import toast from "react-hot-toast"
 
 const Dashboard = () => {
   const [data, setData] = useState(null)
   const [loading,setLoading] = useState(true)
 
   useEffect(()=>{
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setData(dummyAdminDashboardData)
-    setTimeout(()=>{
-      setLoading(false)
-    },1000)
+    api.get('/dashboard').then((res)=> setData(res.data)).catch((err)=>
+    toast.error(err.response?.data?.error || err?.message)).finally(()=>
+    setLoading(false))
   },[])
 
   if(loading) return <Loading />

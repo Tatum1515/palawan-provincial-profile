@@ -1,24 +1,39 @@
 import { useCallback, useEffect, useState } from "react"
-import { dummyEmployeeData, dummyPayslipData} from "../assets/assets"
 import Loading from "../components/Loading"
 import PayslipList from "../components/payslip/PayslipList"
 import GeneratePayslipsForm from "../components/payslip/GeneratePayslipsForm"
-  
+import {useAuth} from "../context/AuthContext";
+import toast from "react-hot-toast"
+import api from "../api/axios.js"
+
 const Payslip = () => {
 
-  const isAdmin = true;
-  const [payslips, setPayslips] = useState(dummyPayslipData)
-  const [employees] = useState(isAdmin ? dummyEmployeeData : [])
+  const [payslips, setPayslips] = useState([])
+  const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(true);
+  const {user} = useAuth()
+  const isAdmin = user?.role === "ADMIN";
 
   const fetchPayslips = useCallback(async ()=>{
-    setPayslips(dummyPayslipData)
+    try{
+      const res = await api.get('/payslips')
+      setPayslips(res.data.data || [])
+    }catch(error){
+      toast.error(error?.response?.data?.error || error?.message)
+
+    }finally{
+      setLoading(false)
+    }
   },[])
 
   useEffect(()=>{
-    const t = setTimeout(()=> setLoading(false), 1000)
-    return () => clearTimeout(t)
-  },[])
+    if(isAdmin) api.get("/employees").then((res)=> setEmployees(res.data.filter((e)=> !e.isDeleted))).catch(()=>{})
+  },[isAdmin])
+
+  useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchPayslips()
+  },[fetchPayslips])
 
 if(loading) return <Loading/>
 
