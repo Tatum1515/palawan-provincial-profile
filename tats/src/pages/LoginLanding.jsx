@@ -1,15 +1,16 @@
 import { ArrowRightIcon, ShieldIcon, UserIcon } from "lucide-react"
-import { Link, Navigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import LoginLeftSide from "../components/LoginLeftSide"
 import { useAuth } from "../context/AuthContext"
 import Loading from "../components/Loading"
+import { RoleHome } from "../components/RoleRoute"
 
 
 const LoginLanding = () => {
 
   const {user, loading} = useAuth()
   if(loading) return <Loading/>
-  if(user) return <Navigate to="/dashboard" replace />
+  if(user) return <RoleHome />
 
       const portalOptions = [
         {
@@ -20,7 +21,7 @@ const LoginLanding = () => {
         },
         {
           to: "/login/employee",
-          title: "Employee Portal",
+          title: "User Portal",
           description: "",
           icons: UserIcon,
         }
@@ -73,7 +74,7 @@ const LoginLanding = () => {
 
         {/* Footer */}
         <div className="mt-12 text-center md:text-left text-sm text-slate-400">
-          <p> © {new Date(). getFullYear()} GreatStack. All rights reserved. </p> 
+          <p> © {new Date(). getFullYear()} PPDO Monitoring System. All rights reserved. | Developed by the PPDO Monitoring Division. </p> 
         </div>
       </div>
 

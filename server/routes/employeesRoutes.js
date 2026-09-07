@@ -1,12 +1,65 @@
-import {Router} from "express";
-import {getEmployees, createEmployee, updateEmployee, deleteEmployee} from "../controllers/employeeController.js";
-import { protectAdmin, protect } from "../middleware/auth.js";
+import { Router } from "express";
 
-const employeesRouter = Router();
+import {
+    getEmployees,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
+} from "../controllers/employeeController.js";
 
-employeesRouter.get("/", protect, protectAdmin, getEmployees);
-employeesRouter.post("/", protect, protectAdmin, createEmployee);
-employeesRouter.put("/:id", protect, protectAdmin, updateEmployee);
-employeesRouter.delete("/:id", protect, protectAdmin, deleteEmployee);
+import {
+    protect,
+    protectMainAdmin,
+} from "../middleware/auth.js";
+
+const employeesRouter =
+    Router();
+
+/*
+ * USER MANAGEMENT
+ *
+ * Only the Main Administrator
+ * can access these APIs.
+ */
+
+/*
+ * Get users
+ */
+employeesRouter.get(
+    "/",
+    protect,
+    protectMainAdmin,
+    getEmployees
+);
+
+/*
+ * Create user
+ */
+employeesRouter.post(
+    "/",
+    protect,
+    protectMainAdmin,
+    createEmployee
+);
+
+/*
+ * Update user
+ */
+employeesRouter.put(
+    "/:id",
+    protect,
+    protectMainAdmin,
+    updateEmployee
+);
+
+/*
+ * Delete user
+ */
+employeesRouter.delete(
+    "/:id",
+    protect,
+    protectMainAdmin,
+    deleteEmployee
+);
 
 export default employeesRouter;

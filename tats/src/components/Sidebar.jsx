@@ -1,180 +1,105 @@
-import { useEffect, useState } from "react"
-import { useLocation, Link } from "react-router-dom"
-import {MenuIcon, XIcon,UserIcon, LayoutGridIcon, 
-    CalendarIcon, FileTextIcon, DollarSignIcon, SettingsIcon,
-    ChevronRightIcon,
-    LogOutIcon,
-    Loader2} from 'lucide-react'
-import { useAuth } from "../context/AuthContext"
-import api from "../api/axios.js"
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { BarChart3, BarChart2, Menu, Settings, UserRound, X, LogOut, ListTodo, CalendarDays } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
+import api from "../api/axios.js";
+import ppdoLogo from "../assets/ppdo-logo.png";
 
-const Sidebar = () => {
-    const {pathname} = useLocation()
-    const [userName, setUserName] = useState('')
-    const [mobileOpen,setMobileOpen] =useState(false)
+export default function Sidebar() {
+    const { pathname } = useLocation();
+    const { user, logout } = useAuth();
+    const [userName, setUserName] = useState("");
+    const [mobileOpen, setMobileOpen] = useState(false);
 
-    const {user, loading, logout } = useAuth()
-        
-    useEffect(()=>{
-        api.get("/profile").then(({data})=>{
-            if(data.firstName) setUserName(`${data.firstName} ${data.lastName || " "}`.trim());
-        })
-        }, [])
+    useEffect(() => {
+        let mounted = true;
+        api.get("/profile")
+            .then(({ data }) => {
+                if (mounted && data?.firstName) setUserName(`${data.firstName} ${data.lastName || ""}`.trim());
+            })
+            .catch(() => {});
+        return () => { mounted = false; };
+    }, []);
 
-    // Close mobile sidebar on route change
+    const isAdmin = user?.role === "ADMIN";
+    const isDepartmentHead = user?.role === "DEPARTMENT_HEAD";
+    const items = isAdmin
+        ? [
+            { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
+            { name: "Monitoring / Submissions", href: "/admin-monitoring", icon: ListTodo },
+            { name: "Performance & Summary", href: "/performance-summary", icon: BarChart2 },
+            { name: "Physical Report Control", href: "/physical-report-control", icon: ListTodo },
+            { name: "Calendar of Activities", href: "/calendar", icon: CalendarDays },
+            { name: "Users", href: "/employees", icon: UserRound },
+            { name: "Settings", href: "/settings", icon: Settings },
+        ]
+        : [
+            { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
+            { name: isDepartmentHead ? "For Approval / Submissions" : "Tasks & Submissions", href: isDepartmentHead ? "/approval" : "/submissions", icon: ListTodo },
+            { name: "Physical Reports", href: "/physical-report", icon: ListTodo },
+            { name: "Calendar of Activities", href: "/calendar", icon: CalendarDays },
+            { name: "Settings", href: "/settings", icon: Settings },
+        ];
 
-    useEffect(
-        ()=>{
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setMobileOpen(false)
-        }, [pathname])
+    const logoutUser = () => {
+        logout();
+        window.location.assign("/login");
+    };
 
+    // A couple of nav entries are "hubs" for several related routes reached by drilling in
+    // from that hub, so highlight the hub link while the user is on any of those sub-pages.
+    const isActive = (href) => {
+        if (pathname === href) return true;
+        if (href === "/admin-monitoring") return pathname === "/documents";
+        if (href === "/submissions") return ["/timeline"].includes(pathname);
+        if (href === "/approval") return pathname === "/approval" || pathname === "/submissions";
+        if (href === "/performance-summary") return ["/performance", "/office-performance", "/physical-report", "/monitoring-summary"].includes(pathname);
+        if (href === "/physical-report-control") return pathname === "/physical-report-control";
+        if (href === "/calendar") return pathname === "/calendar";
+        return false;
+    };
 
-    const role = user?.role;
-    const navItems = [
-        {name: "Dashboard", href: "/dashboard" , icon: LayoutGridIcon},
-        role === "ADMIN" ? 
-        {name: "Employees", href: "/employees" , icon: UserIcon}:
-        {name: "Attendance", href: "/attendance" , icon: CalendarIcon},
-        {name: "Leave", href: "/leave" , icon: FileTextIcon},
-        {name: "Payslip", href: "/payslip" , icon: DollarSignIcon},
-        {name: "Settings", href: "/settings" , icon: SettingsIcon},
-    ]
-
-    const handleLogout = () => {
-        logout()
-        window.location.href = "/login"
-    }
-
-        const sidebarContent = (
-            <>
-            {/*Brandheader */}
-
-            <div className='px-5 pt-6 border-b border-white/6'>
-            <div className='flex items-center justify-between'>
-                <div className='flex items-center gap-3'>
-                    <UserIcon className='text-white size-7'/>  
-                    <div>
-                    <p className='font-semibold text-[13px] text-white tracking-wide'>
-                        Employee MS </p>
-                    <p className='text-[11px] text-slate-500 font-meduim '>
-                        Management System </p>
-                </div>
-                </div>
-                {/*Close button on mobile */}
-                <button onClick={()=>setMobileOpen(false)} className="lg:hidden text-slate-400 hover:text-white p-1">
-                    <XIcon/>
-                </button>
-            </div>
-            </div>
-
-            {/*User profile card */}
-
-            {userName && (
-                <div className="mx-3 mt-4 mb-1 p-3 rounded-lg bg-white/3 border border-white/4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center ring-1 ring-white/10 shrink-0">
-                            <span className="text-slate-400 text-xs font-semibold">
-                                {userName.charAt(0).toUpperCase()}
-                            </span>
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-[13px] font-medium text-slate-200 truncate">
-                                {userName}
-                            </p>
-                            <p className="text-[11px] font-medium text-slate-500 truncate">
-                                {role == "ADMIN" ? "Administrator" : "Employee"}
-                            </p>
-                        </div>
+    const content = (
+        <div className="flex h-full flex-col bg-[#0d1629] text-white">
+            <div className="border-b border-white/10 px-5 py-6">
+                <div className="flex items-center gap-3">
+                    <img
+                        src={ppdoLogo}
+                        alt="Province of Palawan"
+                        className="h-12 w-12 object-contain"
+                    />
+                    <div className="min-w-0">
+                        <p className="font-semibold">PPDO Monitor</p>
+                        <p className="truncate text-xs text-slate-400">Document & Performance System</p>
                     </div>
                 </div>
-            )}
-
-            {/*Section label*/}
-            <div className="px-5 pt-5 pb-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Navigation
-                </p>
+                <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="truncate font-semibold">{userName || user?.email || "User"}</p>
+                    <p className="text-xs text-slate-400">{isAdmin ? "Administrator" : isDepartmentHead ? "Department Head / Approval Body" : "Encoder / Office User"}</p>
+                </div>
             </div>
 
-            {/* Navigation List */ }
+            <nav className="flex-1 overflow-y-auto px-3 py-5">
+                <p className="px-3 pb-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Navigation</p>
+                {items.map((item) => {
+                    const Icon = item.icon;
+                    return <Link key={item.href} to={item.href} onClick={() => setMobileOpen(false)} className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${isActive(item.href) ? "bg-indigo-600/20 text-indigo-300" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}>
+                        <Icon size={19} />
+                        <span>{item.name}</span>
+                    </Link>;
+                })}
+            </nav>
 
-            <div className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-                {loading ? (
-                    <div className="px-3 py-3 flex items-center gap-2 text-slate-500">
-                        <Loader2 className="animate-spin w-4 h-4"/>
-                        <span className="text-sm">Loading....</span>
-
-                    </div>
-                ): (
-                    navItems.map((item)=>{
-                    const isActive = pathname.startsWith(item.href)
-                    return(
-                        <Link key={item.name} to={item.href} className={`group flex items-center gap-3 
-                        px-3 py-2.5 rounded-md text-[13px] font-medium transition-all duration-150 relative
-                        ${isActive ? "bg-indigo-500/12 text-indigo-300" : "text-slate-300 hover:text-white hover:bg-white/4"}`}>
-                        {isActive && <div className="absolute left-0 
-                        top-1/2 -translate-y-1/2 w-0.75 h-5
-                        rounded-br-full bg-indigo-500" />}
-                        <item.icon className={`w-4.25 h-4.25 shrink-0 ${isActive ? "text-indigo-300" : 
-                            "text-slate-400 group-hover:text-slate-300"}`}/>
-                            <span className="flex-1">{item.name}</span>
-                            {isActive && <ChevronRightIcon className="w-3.5 h-3.5 text-indigo-500/50"/>}
-
-                        </Link>
-                    )
-                }
-                )
-
-                )}
-                
-            </div>
-            {/*Logout*/}
-            <div className="p-3 border-t border-white/6">
-                <button onClick={handleLogout}className="flex items-center gap-3 w-full px-3 py-2.5
-                rounded-md text-[13px] font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/8 transition-all duration-150">
-                    <LogOutIcon className="w-4.25 h-4.25"/>
-                    <span>Log Out</span>
-                </button>
-            </div>
-
-            </>
-        )
-
-        return (
-            <>
-            {/*Mobile hamburger button */}
-            <button onClick={()=>setMobileOpen(true)} className="lg:hidden fixed top-4 left-4 z-50 p-2
-             bg-slate-900 text-white rounded-lg shadow-lg border border-white/10">
-                <MenuIcon size={20}/>
+            <button onClick={logoutUser} className="m-3 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white">
+                <LogOut size={19} />
+                Logout
             </button>
-            {/*Mobile overlay */}
+        </div>
+    );
 
-            {mobileOpen && <div className="lg:hidden fixed inset-0 bg-black/60 
-            backdrop-blur-sm z-40" onClick={()=>setMobileOpen(false)}/>}
-
-            {/*Sidebar desktop */}
-
-            <aside className='hidden lg:flex flex-col h-full w-65
-            bg-linear-to-b from-slate-900 via-slate-900 to-slate-950 text-white
-            shrink-0 border-r border-white/4'>
-                {sidebarContent}
-            </aside>
-
-            {/*Sidebar mobile*/}
-
-            <aside className={`lg:hidden fixed inset-y-0 left-0 w-72 
-                bg-linear-to-b from-slate-900 via-sky-900 to-slate-950 text-white
-                z-50 flex flex-col transform transition-transform 
-                duration-300 ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}> {sidebarContent}
-
-            </aside>
-
-
-            </>
-        )
-
-
+    return <>
+        <aside className="hidden h-screen w-72 shrink-0 lg:block">{content}</aside>
+        <button aria-label="Open navigation" onClick={() => setMobileOpen(true)} className="fixed left-4 top-4 z-40 rounded-xl bg-[#0d1629] p-3 text-white shadow-lg lg:hidden"><Menu size={20} /></button>
+        {mobileOpen && <div className="fixed inset-0 z-50 lg:hidden"><div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} /><aside className="relative h-full w-72">{content}<button aria-label="Close navigation" onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 rounded-lg p-2 text-white"><X size={20} /></button></aside></div>}
+    </>;
 }
-
-export default Sidebar

@@ -1,44 +1,142 @@
 import Employee from "../models/Employee.js";
+import User from "../models/User.js";
 
 // GET /api/profile
-export const getProfile = async (req, res) => {
+export const getProfile = async (
+    req,
+    res
+) => {
     try {
-        const session = req.session;
-        // token payload contains `id` (see authController)
-        const employee = await Employee.findOne({ userID: session?.id });
+        const user = await User.findById(
+            req.session.id
+        ).select(
+            "email role isActive lastLoginAt createdAt firstName lastName phone"
+        );
 
-        if (!employee) {
-            // authenticated user is not an employee - return admin profile
-            return res.json({
-                firstName: "Admin",
-                lastName: "",
-                email: session?.email,
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found.",
             });
         }
 
-        return res.json(employee);
+        const employee =
+            await Employee.findOne({
+                userID: req.session.id,
+            }).lean();
+
+        return res.json({
+            id: user._id.toString(),
+            email: user.email,
+            role: user.role,
+            isActive: user.isActive !== false,
+            lastLoginAt:
+                user.lastLoginAt,
+            createdAt: user.createdAt,
+            firstName:
+                employee?.firstName ||
+                user.firstName ||
+                "Admin",
+            lastName:
+                employee?.lastName ||
+                user.lastName ||
+                "",
+            phone:
+                employee?.phone ||
+                user.phone ||
+                "",
+            position:
+                employee?.position ||
+                "Administrator",
+            department:
+                employee?.department ||
+                "Provincial Planning and Development Office",
+            joinDate:
+                employee?.joinDate ||
+                user.createdAt,
+            employmentStatus:
+                employee?.employmentStatus ||
+                (user.isActive
+                    ? "ACTIVE"
+                    : "INACTIVE"),
+        });
     } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch profile" });
+        console.error(
+            "Get profile error:",
+            error
+        );
+
+        return res.status(500).json({
+            error: "Failed to fetch profile.",
+        });
     }
 };
 
 // PUT /api/profile
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (
+    req,
+    res
+) => {
     try {
-        const session = req.session;
-        const employee = await Employee.findOne({ userID: session?.id });
+        const {
+            firstName,
+            lastName,
+            phone,
+        } = req.body;
 
-        if (!employee) {
-            return res.status(404).json({ error: "Employee not found" });
+        if (!firstName?.trim() || !lastName?.trim()) {
+            return res.status(400).json({
+                error:
+                    "First name and last name are required.",
+            });
         }
 
-        if (employee.isDeleted) {
-            return res.status(403).json({ error: "Your account is deactivated" });
+        const user = await User.findById(
+            req.session.id
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found.",
+            });
         }
 
-        await Employee.findByIdAndUpdate(employee._id, { bio: req.body.bio });
-        return res.json({ success: true });
+        const normalizedFirstName = firstName.trim();
+        const normalizedLastName = lastName.trim();
+        const normalizedPhone = String(phone || "").trim();
+
+        user.firstName = normalizedFirstName;
+        user.lastName = normalizedLastName;
+        user.phone = normalizedPhone;
+        await user.save();
+
+        const employee = await Employee.findOne({
+            userID: req.session.id,
+        });
+
+        if (employee) {
+            employee.firstName = normalizedFirstName;
+            employee.lastName = normalizedLastName;
+            employee.phone = normalizedPhone;
+            await employee.save();
+        }
+
+        return res.json({
+            success: true,
+            message: "Profile updated successfully.",
+            profile: {
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+                phone: normalizedPhone,
+            },
+        });
     } catch (error) {
-        return res.status(500).json({ error: "Failed to update profile" });
+        console.error(
+            "Update profile error:",
+            error
+        );
+
+        return res.status(500).json({
+            error: "Failed to update profile.",
+        });
     }
 };

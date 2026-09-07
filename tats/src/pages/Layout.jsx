@@ -3,6 +3,7 @@ import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import { useAuth } from "../context/AuthContext"
 import Loading from "../components/Loading"
+import RouteErrorBoundary from "../components/RouteErrorBoundary"
 
 const Layout = () => {
   const {user,loading} = useAuth()
@@ -16,7 +17,7 @@ const Layout = () => {
         <Sidebar/>
       <main className="flex-1 overflow-y-auto">
         <div className="p-4 pt-16 sm:p-6 lg:p-8 max-w-400 mx-auto">
-          <Outlet/>
+          <RouteErrorBoundary><Outlet/></RouteErrorBoundary>
         </div>
       </main>
     </div>

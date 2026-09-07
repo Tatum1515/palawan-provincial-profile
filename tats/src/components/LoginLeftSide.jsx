@@ -9,8 +9,8 @@ const LoginLeftSide = () => {
         </div>
             
         <div className="relative z-10 flex flex-col items-start justify-center p-12 lg:p-20 w-full h-full">
-            <h1 className="text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight tracking-tight">Employee <br /> Monitoring System </h1>
-            <p className="text-slate-400 text-lg max-w-md leading-relaxed"> Description of the monitoring system </p>
+            <h1 className="text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight tracking-tight">PPDO <br /> Monitoring System </h1>
+            <p className="text-slate-400 text-lg max-w-md leading-relaxed"> A centralized system for submitting, tracking, and monitoring PPDO documents, office performance, and program accomplishments. </p>
         </div>
         
     </div>

@@ -22,8 +22,12 @@ import toast from "react-hot-toast"
         setError("")
         setLoading(true)
         try{
+            // Dashboard.jsx renders the admin dashboard for ADMIN and
+            // UserDashboard for everyone else, so every role lands here.
+            // (Previously non-admins were sent to "/monitoring", a route
+            // that no longer exists, breaking the post-login redirect.)
             await login(email, password, role)
-            navigate("/dashboard")
+            navigate("/dashboard", { replace: true })
         }catch(error){
             toast.error(error.response?.data?.error ||error.message || "Login Failed")
 
