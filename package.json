@@ -1,0 +1,13 @@
+{
+  "name": "ppdo-palawan-investment-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Palawan Investment Portal \u2014 Provincial Government of Palawan",
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "dev:backend": "npm --prefix backend run dev",
+    "test:frontend": "npm --prefix frontend test",
+    "test:backend": "npm --prefix backend test"
+  }
+}

@@ -1,0 +1,144 @@
+.section-government { background: #f3f6f3; }
+
+.governor-feature {
+  display: grid;
+  grid-template-columns: minmax(300px, .74fr) minmax(0, 1.26fr);
+  background: #fff;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.governor-photo-wrap {
+  position: relative;
+  min-height: 540px;
+  overflow: hidden;
+  background: #d9e7e1;
+  isolation: isolate;
+}
+
+.governor-photo {
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  transform: scale(1.01);
+}
+
+.governor-photo-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4, 36, 29, 0) 52%, rgba(4, 36, 29, .48) 100%);
+  pointer-events: none;
+}
+
+.governor-photo-label {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 1;
+  background: rgba(7, 47, 38, .92);
+  color: #dbeae4;
+  padding: 9px 11px;
+  font-size: 9px;
+  letter-spacing: .16em;
+  font-weight: 800;
+}
+
+.governor-copy {
+  padding: 64px 68px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.governor-copy h2 {
+  max-width: 720px;
+  font-size: clamp(36px, 4vw, 58px);
+  line-height: 1.04;
+  letter-spacing: -.03em;
+  margin: 12px 0 18px;
+}
+
+.governor-copy > p {
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.78;
+  margin: 0;
+}
+
+.governor-meta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 30px 0 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.governor-meta strong,
+.governor-meta span {
+  display: block;
+}
+
+.governor-meta strong {
+  font-size: 13px;
+  letter-spacing: .08em;
+}
+
+.governor-meta span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+
+.governor-tagline {
+  color: var(--forest);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.35;
+  text-align: right;
+  max-width: 260px;
+}
+
+@media (max-width: 900px) {
+  .governor-feature { grid-template-columns: 1fr; }
+  .governor-photo-wrap,
+  .governor-photo { min-height: 500px; }
+  .governor-copy { padding: 46px 36px; }
+}
+
+@media (max-width: 560px) {
+  .governor-photo-wrap,
+  .governor-photo { min-height: 410px; }
+  .governor-copy { padding: 36px 24px; }
+  .governor-meta { flex-direction: column; align-items: flex-start; }
+  .governor-tagline { text-align: left; }
+}
+
+/* STEP 20 — GOVERNOR FEATURE POLISH — PHOTO RETAINED */
+.governor-feature { border-radius: var(--radius-lg); box-shadow: var(--shadow-card); transition: box-shadow .28s ease, border-color .28s ease; }
+.governor-feature:hover { box-shadow: 0 26px 62px rgba(15,50,42,.12); border-color: #c3d8d0; }
+.governor-photo { transition: transform .6s var(--ease), filter .4s ease; }
+.governor-feature:hover .governor-photo { transform: scale(1.022); filter: saturate(1.02); }
+.governor-photo-label { border-radius: 8px; transition: transform .22s var(--ease), background .2s ease; }
+.governor-feature:hover .governor-photo-label { transform: translateY(-2px); background: rgba(7,47,38,.96); }
+.governor-copy { position: relative; }
+.governor-copy::before {
+  content: '';
+  position: absolute;
+  top: 54px;
+  left: 0;
+  width: 3px;
+  height: 74px;
+  background: linear-gradient(#d1a75a, rgba(209,167,90,0));
+  opacity: .72;
+}
+.governor-tagline { transition: transform .22s var(--ease), color .2s ease; }
+.governor-feature:hover .governor-tagline { transform: translateY(-2px); color: var(--forest-2); }
+@media (max-width: 900px) { .governor-copy::before { display: none; } }

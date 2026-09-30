@@ -1,0 +1,15 @@
+PPDO Palawan Investment Portal — visual asset sources
+
+PGP logo:
+https://palawan.gov.ph/wp-content/uploads/2023/12/cropped-pgp-logo-2.png
+Official Provincial Government of Palawan asset.
+
+Governor image:
+https://palawan.gov.ph/wp-content/uploads/2025/12/Gov-Final-scaled.jpeg
+Official Provincial Government of Palawan asset.
+
+Opening / hero image:
+https://commons.wikimedia.org/wiki/File:El_Nido,_Philippines_(Unsplash).jpg
+Wikimedia Commons page for the El Nido image used in the presentation.
+
+Replace the remote URLs with local approved assets when the final PGP brand package is supplied.

@@ -1,0 +1,511 @@
+export const provincialProfile = {
+  statusNote: 'No available data at present / Ongoing data gathering',
+
+  geographicAdministrative: [
+    { label: 'Region', value: 'IV-B Mimaropa' },
+    { label: 'Distance from Manila', value: '593 kms (368 miles)' },
+    { label: 'Total Land Area', value: '17,030.75' },
+    { label: 'Forest Land Area', value: '705,061', source: 'NAMRIA/DENR 2025' },
+    { label: 'Closed forest', value: '163,922' },
+    { label: 'Open Forest', value: '480,691' },
+    { label: 'Mangrove Forest', value: '60,448' },
+    { label: 'Alienable and Disposable Land', value: '453,700 hectares or 4537 km' },
+    { label: 'Marine Protected Area under NIPAS', value: '82,820', source: 'PRM 2024' },
+    {
+      label: 'Terrestrial Protected Area including inland wetland and caves under NIPAS',
+      value: '334,477',
+    },
+    { label: 'Number of Community-Based Forest Management Agreements', value: '37' },
+    { label: 'Coastal Length', value: null },
+    { label: 'Number of Islands', value: '1,769' },
+    { label: 'Number of Municipalities', value: '23' },
+    { label: 'Number of Component Cities', value: '1 HUC' },
+    { label: 'Number of Barangays', value: '367' },
+    { label: 'Congressional Districts', value: '3' },
+    { label: 'Palawan Surface Water Resources', value: '99' },
+  ],
+
+  headlineFacts: [
+    { value: '1,769', label: 'Islands' },
+    { value: '23', label: 'Municipalities' },
+    { value: '1 HUC', label: 'Component Cities' },
+    { value: '367', label: 'Barangays' },
+  ],
+
+  population: {
+    totalPopulation: [
+      { year: '2015', value: '849,469' },
+      { year: '2020', value: '939,594' },
+      { year: '2024', value: '968,795' },
+    ],
+    malePopulation: [
+      { year: '2015', value: '442,574' },
+      { year: '2020', value: '488,281' },
+      { year: '2024', value: null },
+    ],
+    femalePopulation: [
+      { year: '2015', value: '406,895' },
+      { year: '2020', value: '451,313' },
+      { year: '2024', value: null },
+    ],
+    growthRate: [
+      { period: '2015-2020', value: '2.14' },
+      { period: '2015-2024', value: '1.48' },
+      { period: '2020-2024', value: '0.74' },
+    ],
+    density: [
+      { year: '2015', value: '58', unit: 'persons/km' },
+      { year: '2020', value: '64', unit: 'persons/km' },
+      { year: '2024', value: '66', unit: 'persons/km' },
+    ],
+    households: [
+      { year: '2015', value: '195,074' },
+      { year: '2020', value: '230,836' },
+      { year: '2024', value: '246,440' },
+    ],
+    averageHouseholdSize: [
+      { year: '2015', value: '4.3' },
+      { year: '2020', value: '4' },
+      { year: '2024', value: '3.9' },
+    ],
+    povertyIncidenceFamilies: [
+      { year: '2018', value: '10' },
+      { year: '2021', value: '10.9' },
+      { year: '2023', value: '19.6' },
+    ],
+    povertyIncidencePopulation: [
+      { year: '2018', value: '14.6' },
+      { year: '2021', value: '15.7' },
+      { year: '2023', value: '27.2' },
+    ],
+    subsistenceIncidenceFamilies: [
+      { year: '2018', value: '2.3' },
+      { year: '2021', value: '2.4' },
+      { year: '2023', value: '5.9' },
+    ],
+    subsistenceIncidencePopulation: [
+      { year: '2018', value: '3.7' },
+      { year: '2021', value: '3.9' },
+      { year: '2023', value: '8.7' },
+    ],
+    literacyRate: { year: '2024', value: '84.00' },
+    source: 'PSA Data',
+  },
+
+
+  employment: {
+    laborForceParticipationRate: [
+      { year: '2014', value: '30.97' },
+      { year: '2022', value: '53.22' },
+      { year: '2024', value: '69.56' },
+    ],
+    employmentRate: [
+      { year: '2014', value: '93.38' },
+      { year: '2022', value: '89.31' },
+      { year: '2024', value: '90.25' },
+    ],
+    unemploymentRate: [
+      { year: '2014', value: '6.62' },
+      { year: '2022', value: '10.69' },
+      { year: '2024', value: '9.75' },
+    ],
+    underemploymentRate: [
+      { year: '2014', value: null },
+      { year: '2022', value: '9.15' },
+      { year: '2024', value: '22.47' },
+    ],
+    laborForce: [
+      { year: '2014', value: '471,768' },
+      { year: '2022', value: '296,359' },
+      { year: '2024', value: '305,057' },
+    ],
+    source: 'CBMS Data 2014, 2022, 2024 Survey',
+  },
+
+
+  religiousAffiliation: {
+    provinceTotal: {
+      municipality: 'PALAWAN',
+      totalPopulation: '894,446',
+      romanCatholic: '484,639',
+      islam: '100,842',
+      iglesiaNiCristo: '27,554',
+      protestant: '0',
+      seventhDayAdventist: '22,952',
+      otherReligion: '7',
+      noReligion: '16,994',
+    },
+    municipalities: [
+      { municipality: 'Aborlan, Palawan', totalPopulation: '37,927', romanCatholic: '24,846', islam: '738', iglesiaNiCristo: '870', protestant: '0', seventhDayAdventist: '1,253', otherReligion: '0', noReligion: '186' },
+      { municipality: 'Agutaya, Palawan', totalPopulation: '12,180', romanCatholic: '9,969', islam: '71', iglesiaNiCristo: '440', protestant: '0', seventhDayAdventist: '411', otherReligion: '0', noReligion: '96' },
+      { municipality: 'Araceli, Palawan', totalPopulation: '14,214', romanCatholic: '13,014', islam: '53', iglesiaNiCristo: '202', protestant: '0', seventhDayAdventist: '457', otherReligion: '0', noReligion: '13' },
+      { municipality: 'Balabac, Palawan', totalPopulation: '39,644', romanCatholic: '2,608', islam: '35,252', iglesiaNiCristo: '117', protestant: '0', seventhDayAdventist: '128', otherReligion: '0', noReligion: '40' },
+      { municipality: 'Bataraza, Palawan', totalPopulation: '86,772', romanCatholic: '26,561', islam: '25,887', iglesiaNiCristo: '3,687', protestant: '0', seventhDayAdventist: '1,023', otherReligion: '0', noReligion: '4,893' },
+      { municipality: "Brooke's Point, Palawan", totalPopulation: '74,294', romanCatholic: '26,774', islam: '11,986', iglesiaNiCristo: '3,505', protestant: '0', seventhDayAdventist: '2,812', otherReligion: '0', noReligion: '6,445' },
+      { municipality: 'Busuanga, Palawan', totalPopulation: '24,359', romanCatholic: '17,896', islam: '16', iglesiaNiCristo: '784', protestant: '0', seventhDayAdventist: '247', otherReligion: '0', noReligion: '63' },
+      { municipality: 'Cagayancillo, Palawan', totalPopulation: '7,156', romanCatholic: '6,733', islam: '17', iglesiaNiCristo: '52', protestant: '0', seventhDayAdventist: '98', otherReligion: '0', noReligion: '1' },
+      { municipality: 'Coron, Palawan', totalPopulation: '57,650', romanCatholic: '35,374', islam: '501', iglesiaNiCristo: '2,753', protestant: '0', seventhDayAdventist: '974', otherReligion: '0', noReligion: '281' },
+      { municipality: 'Culion, Palawan', totalPopulation: '22,740', romanCatholic: '16,307', islam: '43', iglesiaNiCristo: '235', protestant: '0', seventhDayAdventist: '357', otherReligion: '7', noReligion: '130' },
+      { municipality: 'Cuyo, Palawan', totalPopulation: '21,300', romanCatholic: '19,734', islam: '59', iglesiaNiCristo: '18', protestant: '0', seventhDayAdventist: '603', otherReligion: '0', noReligion: '3' },
+      { municipality: 'Dumaran, Palawan', totalPopulation: '23,745', romanCatholic: '15,423', islam: '156', iglesiaNiCristo: '136', protestant: '0', seventhDayAdventist: '676', otherReligion: '0', noReligion: '116' },
+      { municipality: 'El Nido, Palawan', totalPopulation: '47,623', romanCatholic: '29,332', islam: '448', iglesiaNiCristo: '2,158', protestant: '0', seventhDayAdventist: '1,418', otherReligion: '0', noReligion: '110' },
+      { municipality: 'Kalayaan, Palawan', totalPopulation: '292', romanCatholic: '215', islam: '12', iglesiaNiCristo: '7', protestant: '0', seventhDayAdventist: '0', otherReligion: '0', noReligion: '0' },
+      { municipality: 'Linapacan, Palawan', totalPopulation: '15,143', romanCatholic: '9,462', islam: '68', iglesiaNiCristo: '133', protestant: '0', seventhDayAdventist: '394', otherReligion: '0', noReligion: '91' },
+      { municipality: 'Magsaysay, Palawan', totalPopulation: '11,711', romanCatholic: '10,695', islam: '2', iglesiaNiCristo: '4', protestant: '0', seventhDayAdventist: '580', otherReligion: '0', noReligion: '3' },
+      { municipality: 'Narra, Palawan', totalPopulation: '76,373', romanCatholic: '46,346', islam: '1,940', iglesiaNiCristo: '3,404', protestant: '0', seventhDayAdventist: '2,906', otherReligion: '0', noReligion: '774' },
+      { municipality: 'Quezon, Palawan', totalPopulation: '59,857', romanCatholic: '24,696', islam: '4,085', iglesiaNiCristo: '1,950', protestant: '0', seventhDayAdventist: '839', otherReligion: '0', noReligion: '430' },
+      { municipality: 'Rizal, Palawan', totalPopulation: '54,407', romanCatholic: '15,891', islam: '10,278', iglesiaNiCristo: '674', protestant: '0', seventhDayAdventist: '1,004', otherReligion: '0', noReligion: '2,119' },
+      { municipality: 'Roxas, Palawan', totalPopulation: '67,774', romanCatholic: '49,473', islam: '756', iglesiaNiCristo: '1,675', protestant: '0', seventhDayAdventist: '1,472', otherReligion: '0', noReligion: '434' },
+      { municipality: 'San Vicente, Palawan', totalPopulation: '32,551', romanCatholic: '21,428', islam: '127', iglesiaNiCristo: '1,787', protestant: '0', seventhDayAdventist: '1,581', otherReligion: '0', noReligion: '84' },
+      { municipality: 'Sofronio Española, Palawan', totalPopulation: '35,064', romanCatholic: '11,532', islam: '7,980', iglesiaNiCristo: '1,341', protestant: '0', seventhDayAdventist: '928', otherReligion: '0', noReligion: '301' },
+      { municipality: 'Taytay, Palawan', totalPopulation: '71,670', romanCatholic: '50,330', islam: '367', iglesiaNiCristo: '1,622', protestant: '0', seventhDayAdventist: '2,791', otherReligion: '0', noReligion: '381' },
+    ],
+    source: '2024 Community-Based Monitoring System, Philippine Statistics Authority',
+  },
+
+
+  higherEducation: {
+    institutions: [
+      { name: 'Holy Trinity University', type: 'Private university', location: 'Puerto Princesa City', group: 'Other listed institutions' },
+      { name: 'Fullbright College', type: 'Private college', location: 'Puerto Princesa City', group: 'Other listed institutions' },
+      { name: 'San Brendan College, Inc.', type: 'Private college', location: 'Taytay', group: 'Other listed institutions' },
+      { name: 'San Francisco Javier College-AR of Narra, Palawan, Inc.', type: 'Private college', location: 'Narra', group: 'Other listed institutions' },
+      { name: 'STI College, Puerto Princesa', type: 'Private college', location: 'Puerto Princesa City', group: 'Other listed institutions' },
+      { name: 'Southern Palawan College, Inc.', type: 'Private college', location: "Brooke's Point", group: 'Other listed institutions' },
+    ],
+    palawanStateUniversityCampuses: [
+      { name: 'Main Campus', location: 'Puerto Princesa City' },
+      { name: 'Manalo Campus', location: 'Puerto Princesa City' },
+      { name: 'Araceli Campus', location: 'Araceli' },
+      { name: 'Balabac Campus', location: 'Balabac' },
+      { name: 'Bataraza Campus', location: 'Bataraza' },
+      { name: "Brooke's Point Campus", location: "Brooke's Point" },
+      { name: 'Coron Campus', location: 'Coron' },
+      { name: 'Cuyo Campus', location: 'Cuyo' },
+      { name: 'Dumaran Campus', location: 'Dumaran' },
+      { name: 'El Nido / New Ibajay Campus', location: 'El Nido' },
+      { name: 'Linapacan Campus', location: 'Linapacan' },
+      { name: 'Narra Campus', location: 'Narra' },
+      { name: 'Quezon Campus', location: 'Quezon' },
+      { name: 'Rizal Campus', location: 'Rizal' },
+      { name: 'Roxas Campus', location: 'Roxas' },
+      { name: 'San Rafael Campus', location: 'Puerto Princesa City' },
+      { name: 'San Vicente Campus', location: 'San Vicente' },
+      { name: 'Sofronio Española Campus', location: 'Sofronio Española' },
+      { name: 'Taytay Campus', location: 'Taytay' },
+    ],
+    westernPhilippinesUniversityCampuses: [
+      { name: 'Main Campus', location: 'Aborlan' },
+      { name: 'Puerto Princesa City Campus', location: 'Puerto Princesa City' },
+      { name: 'Busuanga Campus', location: 'Busuanga' },
+      { name: 'Culion Campus', location: 'Culion' },
+      { name: 'El Nido Campus', location: 'El Nido' },
+      { name: 'Quezon Campus', location: 'Quezon' },
+      { name: 'Rio Tuba Campus', location: 'Bataraza' },
+    ],
+    psuGroupLabel: 'Palawan State University Colleges (19)',
+    wpuGroupLabel: 'Western Philippines University/Colleges (7)',
+    enrollment: [
+      { year: '2023', value: '47,533' },
+      { year: '2020', value: '49,298' },
+      { year: '2025', value: '56,371' },
+    ],
+    graduates: [
+      { year: '2023', value: '6610' },
+      { year: '2020', value: '8,158' },
+      { year: '2025', value: '7,208' },
+    ],
+    graduateFields: [
+      { name: 'Business', value: null },
+      { name: 'Engineering', value: null },
+      { name: 'Agriculture', value: null },
+      { name: 'Tourism', value: null },
+      { name: 'IT/Computer Science', value: null },
+      { name: 'Healthcare', value: null },
+      { name: 'Education', value: null },
+    ],
+    source: null,
+  },
+
+
+  tvet: {
+    institutions: {
+      tesdaRegisteredProviders: '41',
+      registeredPrograms: '172',
+      accreditedAssessmentCenters: '19',
+      source: 'TESDA',
+    },
+    performance: {
+      enrollment: [
+        { year: '2015', value: '-' },
+        { year: '2020', value: '-' },
+        { year: '2024', value: '14,096' },
+      ],
+      graduates: [
+        { year: '2015', value: '-' },
+        { year: '2020', value: '-' },
+        { year: '2024', value: '13,642' },
+      ],
+      certificationPassers: [
+        { year: '2015', value: '-' },
+        { year: '2020', value: '-' },
+        { year: '2024', value: '11,096' },
+      ],
+      source: 'TESDA',
+    },
+    listedProviders: [
+      {
+        name: "Adviento’s Integrated Farm",
+        location: 'Pulot Center, Sofronio Española',
+        programs: ['Agricultural Crops Production NC II', 'Heavy Equipment Operation NC II – Bulldozer'],
+      },
+      {
+        name: 'Aloha House, Inc.',
+        location: 'Brgy. Sta. Monica, Puerto Princesa City',
+        programs: ['Agricultural Crops Production NC III', 'Heavy Equipment Operation NC II – Motor Grader'],
+      },
+      {
+        name: 'Apicius Culinary Arts and Hotel Management, Inc.',
+        location: 'Brgy. Matahimik, Puerto Princesa City',
+        programs: ['Animal Production (Poultry-Chicken) NC II', 'Heavy Equipment Operation NC II – On-Highway Dump Truck'],
+      },
+      {
+        name: 'Apostolic Vicariate of Taytay (AVT) Social Action Center',
+        location: 'Sitio Pali, Brgy. 6, Coron',
+        programs: ['Animal Production (Swine) NC II', 'Heavy Equipment Operation NC II – Wheel Loader'],
+      },
+      {
+        name: 'Asea Greens Farm',
+        location: 'Brgy. Sta. Lourdes, Puerto Princesa City',
+        programs: ['Animal Production (Ruminants) NC II', 'Hilot (Wellness Massage) NC II'],
+      },
+      {
+        name: 'Asian Business Cabletow Cooperative Academy, Inc. (ABCCA)',
+        location: 'Brgy. Plaridel, Aborlan',
+        programs: ['Horticulture NC III', 'Housekeeping NC II'],
+      },
+      {
+        name: 'Bonsay Farm',
+        location: 'Sitio Matiag, Brgy. Inogbong, Bataraza',
+        programs: ['Organic Agriculture Production NC II', 'Japanese Language and Culture'],
+      },
+      {
+        name: 'Canduyog Farm',
+        location: 'Sitio Canduyog, Brgy. Abongan, Taytay',
+        programs: ['Grains Production NC II', 'Japanese Language and Culture – Beginner Level N5'],
+      },
+      {
+        name: 'Chiyomi Learning Center Corporation',
+        location: 'Brgy. San Miguel, Puerto Princesa City',
+        programs: ['Production of High-Quality Inbred Rice, Seed Certification and Farm Mechanization', 'Korean Language and Culture'],
+      },
+      {
+        name: 'Divine Grace Institute, Inc. (DGI)',
+        location: 'Pacific Plaza Bldg., Rizal Ave., Puerto Princesa City',
+        programs: ['Solar Powered Irrigation System (SPIS) Operation and Maintenance Level II', 'Chinese Mandarin Language and Culture Level II'],
+      },
+      {
+        name: 'Dos Four Dos Farm',
+        location: 'Brgy. Magsaysay, Aborlan',
+        programs: ['Automotive Servicing NC II', 'Basic English Language'],
+      },
+      {
+        name: 'Eve’s Agri Farm',
+        location: 'Km. 55, Brgy. Babuyan, Puerto Princesa City',
+        programs: ['Automotive Servicing NC III', 'Computer-Based English Proficiency'],
+      },
+      {
+        name: 'Farmteach, Inc.',
+        location: 'Candis 3, Brgy. Bacungan, Puerto Princesa City',
+        programs: ['Barista NC II', 'Pharmacy Services NC III'],
+      },
+      {
+        name: 'Fernandez Organic Vegetable Farm',
+        location: 'Brgy. Manlag, El Nido',
+        programs: ['Bartending NC II', 'Patient Care Services – Bundled Qualifications'],
+      },
+      {
+        name: 'Frontliners Skills Training & Review Center, Inc.',
+        location: '128 Rizal Ave., Puerto Princesa City',
+        programs: ['Bookkeeping NC III', 'Plumbing NC I'],
+      },
+      {
+        name: 'GEFI Community College Coron, Inc.',
+        location: 'Sitio Diguiboy, Brgy. 6, Coron',
+        programs: ['Bread and Pastry Production NC II', 'Plumbing NC II'],
+      },
+      {
+        name: 'Javenri Harvest Farm',
+        location: 'Brgy. Sta. Cruz, Puerto Princesa City',
+        programs: ['Caregiving NC II', 'PV Systems Installation NC II'],
+      },
+      {
+        name: 'Jesus the Divine Son Academy, Inc. (JEDSAI)',
+        location: 'Brgy. Tiniguiban, Puerto Princesa City',
+        programs: ['Computer Systems Servicing NC II', 'PV Systems Servicing NC III'],
+      },
+      {
+        name: 'Laura Vicuna Foundation, Inc. – Palawan',
+        location: 'Brgy. Macarascas, Puerto Princesa City',
+        programs: ['Cookery NC II', 'RAC Servicing (Domestic RAC) NC II'],
+      },
+      {
+        name: 'Narra Polytechnic Institute of Technology, Inc.',
+        location: 'Brgy. Antipuluan, Narra',
+        programs: ['Commercial Cooking NC III', 'Shielded Metal Arc Welding (SMAW) NC I'],
+      },
+      {
+        name: 'Northern Palawan Technological Institute, Inc. (NPTII)',
+        location: 'Brgy. Barotuan, El Nido',
+        programs: ['Driving NC II', 'Shielded Metal Arc Welding (SMAW) NC II'],
+      },
+      {
+        name: 'Palawan Adventist Technical-Vocational Institute, Inc. (PATVI)',
+        location: 'Brgy. San Pedro, Puerto Princesa City',
+        programs: ['Dressmaking NC II', 'Scaffold Works NC II'],
+      },
+      {
+        name: 'Philippine Man2Man School, Inc.',
+        location: 'Manalo St., Brgy. Maunlad, Puerto Princesa City',
+        programs: ['Electrical Installation and Maintenance NC II', 'Technical Drafting NC II'],
+      },
+      {
+        name: 'Plastone Language School, Inc.',
+        location: 'Rizal Ave., Puerto Princesa City',
+        programs: ['Electrical Installation and Maintenance NC III', 'Tile Setting NC II'],
+      },
+      {
+        name: 'Provincial Training Center – Palawan (PTC-Palawan)',
+        location: 'Brgy. Magara, Roxas',
+        programs: ['Electronic Products Assembly and Servicing NC II', 'Tour Guiding Services NC II'],
+      },
+      {
+        name: 'Puerto Princesa School of Arts and Trades (PPSAT)',
+        location: 'Rafols Road, Brgy. Sta. Monica, Puerto Princesa City',
+        programs: ['Events Management Services NC III', 'Tourism Promotion Services NC II'],
+      },
+      {
+        name: 'Puerto Princesa School of Science and Technology, Inc. (PPSST)',
+        location: 'Green Valley Road, Brgy. San Jose, Puerto Princesa City',
+        programs: ['Food and Beverage Services NC II', 'Trainers Methodology Level I'],
+      },
+      {
+        name: 'San Brendan College, Inc. (SBCI)',
+        location: 'Brgy. Poblacion, Taytay',
+        programs: ['Food and Beverage Services NC III', 'Trainers Methodology Level II'],
+      },
+      {
+        name: 'Southern Palawan College, Inc. (SPCI)',
+        location: 'Gomez St., Brgy. District I, Brooke’s Point',
+        programs: ['Food Processing NC II', 'Transport RAC Servicing NC II'],
+      },
+      {
+        name: 'Technical Development Center and Career Enhancement, Inc. (TDCCEI)',
+        location: 'Libis Road, Brgy. San Pedro, Puerto Princesa City',
+        programs: ['Front Office Services NC II', 'Barangay Health Services NC II'],
+      },
+      {
+        name: 'Tree of Life Nursery',
+        location: 'Brgy. Sta. Cruz, Puerto Princesa City',
+        programs: ['Health Care Services NC II', 'Contact Tracing Level II'],
+      },
+      {
+        name: 'Yamang Bukid Farm',
+        location: 'Sitio Kandes III, Brgy. Bacungan, Puerto Princesa City',
+        programs: ['Heavy Equipment Operation NC II – Backhoe Loader', 'Beauty Care NC II'],
+      },
+    ],
+    majorSectorPrograms: [
+      {
+        sector: 'Agriculture and fisheries',
+        programs: [
+          'Agricultural Crops Production NC II/III',
+          'Animal Production NC II',
+          'Horticulture NC III',
+          'Organic Agriculture Production NC II',
+          'Grains Production NC II',
+          'Rice production and farm mechanization',
+          'Solar-powered irrigation system operation',
+        ],
+      },
+      {
+        sector: 'Hospitality and tourism',
+        programs: [
+          'Bread and Pastry Production NC II',
+          'Cookery NC II',
+          'Commercial Cooking NC III',
+          'Food and Beverage Services NC II/III',
+          'Bartending NC II',
+          'Housekeeping NC II',
+          'Front Office Services NC II',
+          'Events Management Services NC III',
+          'Tour Guiding Services NC II',
+          'Tourism Promotion Services NC II',
+        ],
+      },
+      {
+        sector: 'Health and wellness',
+        programs: [
+          'Caregiving NC II',
+          'Health Care Services NC II',
+          'Pharmacy Services NC III',
+          'Patient Care Services',
+          'Beauty Care NC II',
+          'Hilot (Wellness Massage) NC II',
+          'Barangay Health Services NC II',
+        ],
+      },
+      {
+        sector: 'Construction and skilled trades',
+        programs: [
+          'SMAW NC I/II',
+          'Plumbing NC I/II',
+          'Masonry-related training',
+          'Tile Setting NC II',
+          'Scaffold Works NC II',
+          'Technical Drafting NC II',
+        ],
+      },
+      {
+        sector: 'Automotive and equipment',
+        programs: [
+          'Automotive Servicing NC II/III',
+          'Motorcycle/small-engine-related training',
+          'Driving NC II',
+          'Heavy Equipment Operation NC II',
+        ],
+      },
+      {
+        sector: 'ICT and business',
+        programs: [
+          'Computer Systems Servicing NC II',
+          'Bookkeeping NC III',
+          'Technical Drafting NC II',
+          'Trainers Methodology I/II',
+        ],
+      },
+      {
+        sector: 'Language',
+        programs: [
+          'Chinese Mandarin Language and Culture',
+          'Japanese Language and Culture',
+          'Japanese Language and Culture N5',
+          'Korean Language and Culture',
+          'Basic English Language',
+          'Computer-Based English Proficiency',
+        ],
+      },
+    ],
+    source: 'TESDA',
+  },
+
+  sourceRecord: { unlabeledValue: '0.1127424126' },
+
+  sources: [
+    'NAMRIA/DENR 2025',
+    'PRM 2024',
+    'Provided Brief Provincial Profile',
+    'PSA Data',
+    '2024 Community-Based Monitoring System, Philippine Statistics Authority',
+  ],
+}
