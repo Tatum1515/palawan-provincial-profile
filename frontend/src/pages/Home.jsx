@@ -9,19 +9,25 @@ import {
   Map,
   Trees,
   Users,
+  Building2,
+  BookMarked,
+  CircleDollarSign,
+  Landmark,
+  MapPinned,
+  ShieldCheck,
 } from 'lucide-react'
+import { Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import GovernorFeature from '../components/GovernorFeature.jsx'
+import DataMeta from '../components/DataMeta.jsx'
+import { LazySparkline } from '../components/lazy.js'
 import { provincialProfile } from '../data/provincialProfile.js'
+import { formatDelta, formatNumber, formatPercent, toNumber } from '../utils/numbers.js'
+import { buildSparklineData, getLatestPair } from '../utils/homeData.js'
 import '../styles/profile-home.css'
 
 const pick = (items, key, value) => items.find((item) => item[key] === value)
 
-const toNumber = (value) => {
-  if (value === null || value === undefined || value === '' || value === '-') return null
-  const parsed = Number(String(value).replaceAll(',', ''))
-  return Number.isFinite(parsed) ? parsed : null
-}
 
 function MiniBarSeries({ values, formatter = (value) => value.toLocaleString() }) {
   const numericValues = values.map((item) => toNumber(item.value)).filter((value) => value !== null)
@@ -60,8 +66,64 @@ function MetricRing({ value, label }) {
   )
 }
 
+function HomeKpiCard({ label, current, currentFormatter, delta, previousYear, series, source, accent = false }) {
+  const currentValue = current?.value ?? current
+  const displayCurrent = currentValue === null || currentValue === undefined || currentValue === '' ? '—' : (currentFormatter ? currentFormatter(currentValue) : currentValue)
+  const sparklineData = buildSparklineData(series)
+
+  return (
+    <article className={`home-kpi-card${accent ? ' home-kpi-card-featured' : ''}`}>
+      <div className="home-kpi-card-top">
+        <span className="home-kpi-label">{label}</span>
+        <span className="home-kpi-year">{current?.year ?? '—'}</span>
+      </div>
+      <div className="home-kpi-value">{displayCurrent}</div>
+      <div className="home-kpi-delta">
+        <strong>{delta}</strong>
+        <span>{previousYear ? `vs ${previousYear}` : 'change'}</span>
+      </div>
+      <div className="home-kpi-sparkline">
+        <Suspense fallback={<div className="home-kpi-sparkline-fallback" aria-label={`${label} trend loading`} />}>
+          <LazySparkline
+            data={sparklineData}
+            dataKey="numericValue"
+            label={`${label} trend`}
+            title=""
+            description=""
+            formatter={(value) => formatNumber(value)}
+            height={54}
+          />
+        </Suspense>
+      </div>
+      <span className="home-kpi-source">Source: {source}</span>
+    </article>
+  )
+}
+
+
+const getGeoIcon = (label) => {
+  const value = label.toLowerCase()
+  if (value.includes('municip')) return MapPinned
+  if (value.includes('barangay')) return Building2
+  if (value.includes('island')) return Map
+  if (value.includes('protected')) return ShieldCheck
+  if (value.includes('forest')) return Trees
+  if (value.includes('land area')) return LandPlot
+  if (value.includes('alienable') || value.includes('disposable')) return LandPlot
+  if (value.includes('population')) return Users
+  if (value.includes('region')) return Landmark
+  if (value.includes('distance')) return MapPinned
+  return CircleDollarSign
+}
+
+
+
 export default function Home() {
-  const { geographicAdministrative, headlineFacts, population, employment, higherEducation, tvet, religiousAffiliation } = provincialProfile
+  const { geographicAdministrative, population, employment, higherEducation, tvet, religiousAffiliation } = provincialProfile
+  const populationPair = getLatestPair(population.totalPopulation)
+  const employmentPair = getLatestPair(employment.employmentRate)
+  const householdsPair = getLatestPair(population.households)
+  const higherEducationEnrollmentPair = getLatestPair(higherEducation.enrollment)
   const population2024 = pick(population.totalPopulation, 'year', '2024')?.value
   const employment2024 = pick(employment.employmentRate, 'year', '2024')?.value
   const laborForce2024 = pick(employment.laborForce, 'year', '2024')?.value
@@ -76,45 +138,83 @@ export default function Home() {
   const tvetEnrollment2024 = pick(tvetPerformanceSeries, 'year', '2024')?.value
   const tvetGraduates2024 = pick(tvet.performance.graduates, 'year', '2024')?.value
   const tvetPassers2024 = pick(tvet.performance.certificationPassers, 'year', '2024')?.value
+
+  const populationDelta = formatDelta(populationPair.current?.value, populationPair.previous?.value)
+  const employmentDelta = formatDelta(employmentPair.current?.value, employmentPair.previous?.value, { suffix: ' pp' })
+  const householdsDelta = formatDelta(householdsPair.current?.value, householdsPair.previous?.value)
+  const higherEducationEnrollmentDelta = formatDelta(higherEducationEnrollmentPair.current?.value, higherEducationEnrollmentPair.previous?.value)
+
+  const populationInsight = populationPair.current && populationPair.previous
+    ? `Population reached ${populationPair.current.value} in ${populationPair.current.year}, ${populationDelta} from ${populationPair.previous.year}.`
+    : 'Population trend is unavailable for the reported years.'
+  const employmentInsight = employmentPair.current && employmentPair.previous
+    ? `Employment rate was ${formatPercent(employmentPair.current.value)} in ${employmentPair.current.year}, ${employmentDelta} from ${employmentPair.previous.year}.`
+    : 'Employment-rate change is unavailable for the reported years.'
+  const householdsInsight = householdsPair.current && householdsPair.previous
+    ? `Households reached ${householdsPair.current.value} in ${householdsPair.current.year}, ${householdsDelta} from ${householdsPair.previous.year}.`
+    : 'Household change is unavailable for the reported years.'
+  const educationInsight = higherEducationEnrollmentPair.current && higherEducationEnrollmentPair.previous
+    ? `Higher-education enrollment reached ${higherEducationEnrollmentPair.current.value} in ${higherEducationEnrollmentPair.current.year}, ${higherEducationEnrollmentDelta} from ${higherEducationEnrollmentPair.previous.year}.`
+    : 'Higher-education enrollment change is unavailable for the reported years.'
   const municipalityCount = pick(geographicAdministrative, 'label', 'Municipalities')?.value
   const barangayCount = pick(geographicAdministrative, 'label', 'Barangays')?.value
   const islandCount = pick(geographicAdministrative, 'label', 'Islands')?.value
 
   const geographic = geographicAdministrative.slice(0, 9)
+  const dataSections = [
+    { label: 'Geographic & administrative', count: geographicAdministrative.length, source: 'Provincial profile', Icon: LandPlot },
+    { label: 'Population & households', count: Object.values(population).filter(Array.isArray).length, source: population.source, Icon: Users },
+    { label: 'Employment', count: Object.values(employment).filter(Array.isArray).length, source: employment.source, Icon: BriefcaseBusiness },
+    { label: 'Religious affiliation', count: religiousAffiliation.municipalities.length, source: religiousAffiliation.source, Icon: Database },
+    { label: 'Higher education', count: higherEducation.institutions.length + higherEducation.enrollment.length, source: 'Provincial profile', Icon: GraduationCap },
+    { label: 'TVET', count: Object.values(tvet.performance).filter(Array.isArray).length, source: 'Provincial profile', Icon: BookOpen },
+  ]
 
   return (
     <>
-      <section className="profile-hero">
-        <div className="profile-hero-grid" aria-hidden="true" />
-        <div className="container profile-hero-inner">
-          <div className="profile-hero-copy">
-            <span className="eyebrow-light">BRIEF PROVINCIAL PROFILE</span>
-            <h1>Palawan, <em>in data.</em></h1>
+      <section className="home-video-hero" aria-labelledby="home-video-title">
+        <div className="home-video-media" aria-hidden="true">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/images/profile-palawan-hero.webp"
+          >
+            <source src="/images/video/palawan-loop.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div className="home-video-overlay" aria-hidden="true" />
+        <div className="home-video-grid" aria-hidden="true" />
+        <div className="container home-video-inner">
+          <div className="home-video-copy">
+            <span className="eyebrow-light">PROVINCIAL GOVERNMENT OF PALAWAN</span>
+            <h1 id="home-video-title">Palawan, <em>in data.</em></h1>
             <p>
-              Geographic, population, employment, religious affiliation, higher education, and TVET information presented from the supplied provincial profile.
+              A source-driven view of Palawan’s people, places, institutions, and opportunities—presented from the supplied provincial profile.
             </p>
             <div className="profile-hero-actions">
               <Link className="btn btn-light" to="/profile">View complete profile <ArrowRight size={16} /></Link>
+              <Link className="btn btn-outline" to="/data">Explore all data <Database size={16} /></Link>
               <Link className="btn btn-outline" to="/locations">View municipalities <Map size={16} /></Link>
             </div>
           </div>
 
-          <div className="profile-hero-data" aria-label="Selected provincial profile values">
-            <div className="hero-data-accent" aria-hidden="true"><span /><span /><span /><span /></div>
-            <div className="hero-data-row">
-              <span>Region</span>
-              <strong>{pick(geographicAdministrative, 'label', 'Region')?.value}</strong>
+          <div className="home-video-meta" aria-label="Homepage video information">
+            <div className="home-video-meta-top">
+              <span>PALAWAN</span>
+              <span className="home-video-live-dot" aria-hidden="true" />
+              <span>PROVINCIAL PROFILE</span>
             </div>
-            <div className="hero-data-row">
-              <span>Distance from Manila</span>
-              <strong>{pick(geographicAdministrative, 'label', 'Distance from Manila')?.value}</strong>
-            </div>
-            <div className="hero-data-row">
-              <span>Total Land Area</span>
-              <strong>{pick(geographicAdministrative, 'label', 'Total Land Area')?.value}</strong>
-            </div>
-            <div className="hero-data-foot"><span>01</span> Source-driven provincial data</div>
+            <div className="home-video-meta-divider" aria-hidden="true" />
+            <p>Visual introduction for the provincial data portal.</p>
           </div>
+
+          <a className="home-video-scroll" href="#data-dashboard">
+            <span>Scroll to explore</span>
+            <ArrowRight size={15} aria-hidden="true" />
+          </a>
         </div>
       </section>
 
@@ -125,14 +225,84 @@ export default function Home() {
         <a href="#geographic">Geography</a>
       </div>
 
-      <section className="profile-stat-section">
+      <section className="home-data-status" aria-label="Current data status">
         <div className="container">
-          <div className="profile-stat-strip">
-            {headlineFacts.map((item) => (
-              <div className="profile-stat" key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
+          <div className="home-data-status-inner">
+            <div className="home-data-status-badge">
+              <span className="home-data-status-dot" aria-hidden="true" />
+              WORKING PROFILE
+            </div>
+            <div className="home-data-status-copy">
+              <strong>Figures are subject to final validation.</strong>
+              <span>Reference years and source labels are retained from the supplied provincial profile. Missing values are not estimated.</span>
+            </div>
+            <Link className="home-data-status-link" to="/data">Review data sources <ArrowRight size={14} aria-hidden="true" /></Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="profile-stat-section" aria-label="Provincial trend indicators">
+        <div className="container">
+          <div className="home-kpi-grid">
+            <HomeKpiCard
+              label="Population"
+              current={populationPair.current}
+              delta={populationDelta}
+              previousYear={populationPair.previous?.year}
+              series={population.totalPopulation}
+              source={population.source}
+              accent
+            />
+            <HomeKpiCard
+              label="Employment rate"
+              current={employmentPair.current}
+              currentFormatter={formatPercent}
+              delta={employmentDelta}
+              previousYear={employmentPair.previous?.year}
+              series={employment.employmentRate}
+              source={employment.source}
+            />
+            <HomeKpiCard
+              label="Households"
+              current={householdsPair.current}
+              delta={householdsDelta}
+              previousYear={householdsPair.previous?.year}
+              series={population.households}
+              source={population.source}
+            />
+            <HomeKpiCard
+              label="Higher-education enrollment"
+              current={higherEducationEnrollmentPair.current}
+              delta={higherEducationEnrollmentDelta}
+              previousYear={higherEducationEnrollmentPair.previous?.year}
+              series={higherEducation.enrollment}
+              source={higherEducation.source || 'Source not specified in supplied profile'}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-data-coverage" id="data-coverage">
+        <div className="container">
+          <div className="profile-section-heading">
+            <div>
+              <span className="eyebrow">DATA COVERAGE</span>
+              <h2>Know what the profile contains before you explore it.</h2>
+            </div>
+            <p>
+              The portal presents the supplied figures by topic, reference period, and source. Missing values remain marked as unavailable instead of being estimated.
+            </p>
+          </div>
+          <div className="data-coverage-grid">
+            {dataSections.map((section) => (
+              <article className="data-coverage-card" key={section.label}>
+                <span className="data-coverage-icon"><section.Icon size={18} aria-hidden="true" /></span>
+                <div className="data-coverage-number">{section.count}</div>
+                <div>
+                  <h3>{section.label}</h3>
+                  <p>{section.source}</p>
+                </div>
+              </article>
             ))}
           </div>
         </div>
@@ -159,10 +329,11 @@ export default function Home() {
               <div className="data-dashboard-card-head">
                 <div>
                   <span className="dashboard-card-kicker">POPULATION</span>
-                  <h3>Population series</h3>
+                  <h3>{populationInsight}</h3>
                   <p>2015, 2020 and 2024 total population.</p>
+                  <DataMeta year="2015–2024" source={population.source} />
                 </div>
-                <span className="dashboard-card-year">2024</span>
+                <span className="dashboard-card-icon"><Users size={19} aria-hidden="true" /></span>
               </div>
               <MiniBarSeries values={populationSeries} />
               <Link className="dashboard-card-link" to="/profile#population">Open population data <ArrowRight size={14} /></Link>
@@ -172,10 +343,11 @@ export default function Home() {
               <div className="data-dashboard-card-head">
                 <div>
                   <span className="dashboard-card-kicker">EMPLOYMENT</span>
-                  <h3>2024 workforce snapshot</h3>
+                  <h3>{employmentInsight}</h3>
                   <p>Employment and unemployment are shown separately.</p>
+                  <DataMeta year="2024" source={employment.source} />
                 </div>
-                <BriefcaseBusiness size={19} />
+                <span className="dashboard-card-icon"><BriefcaseBusiness size={19} aria-hidden="true" /></span>
               </div>
               <div className="workforce-visual">
                 <MetricRing value={employment2024} label="employment" />
@@ -191,10 +363,11 @@ export default function Home() {
               <div className="data-dashboard-card-head">
                 <div>
                   <span className="dashboard-card-kicker">TALENT POOL</span>
-                  <h3>Education & training</h3>
+                  <h3>{educationInsight}</h3>
                   <p>Selected higher-education and TVET reference values.</p>
+                  <DataMeta year="2020–2025" source="Provincial profile" />
                 </div>
-                <GraduationCap size={19} />
+                <span className="dashboard-card-icon"><GraduationCap size={19} aria-hidden="true" /></span>
               </div>
               <div className="talent-metric-stack">
                 <div className="talent-metric-line">
@@ -227,10 +400,10 @@ export default function Home() {
 
           <div className="data-story-grid">
             <Link to="/profile#population" className="data-story-card data-story-population">
-              <div className="data-story-number">01</div>
+              <div className="data-story-icon"><Users size={18} aria-hidden="true" /></div><div className="data-story-number">01</div>
               <div className="data-story-content">
                 <span>PEOPLE</span>
-                <h3>A population picture across reported years.</h3>
+                <h3>{populationInsight}</h3>
                 <div className="story-value-row"><strong>{population2024}</strong><span>2024 total population</span></div>
                 <div className="story-bars" aria-hidden="true">
                   {populationSeries.map((item) => {
@@ -244,10 +417,10 @@ export default function Home() {
             </Link>
 
             <Link to="/profile#higher-education" className="data-story-card data-story-learning">
-              <div className="data-story-number">02</div>
+              <div className="data-story-icon"><GraduationCap size={18} aria-hidden="true" /></div><div className="data-story-number">02</div>
               <div className="data-story-content">
                 <span>LEARNING & TRAINING</span>
-                <h3>Education and training reference values.</h3>
+                <h3>{educationInsight}</h3>
                 <div className="story-stat-pair">
                   <div><strong>{higherEdEnrollment2025}</strong><span>Higher education enrollment · 2025</span></div>
                   <div><strong>{tvetEnrollment2024}</strong><span>TVET enrollment · 2024</span></div>
@@ -257,10 +430,10 @@ export default function Home() {
             </Link>
 
             <Link to="/profile#geographic" className="data-story-card data-story-place">
-              <div className="data-story-number">03</div>
+              <div className="data-story-icon"><LandPlot size={18} aria-hidden="true" /></div><div className="data-story-number">03</div>
               <div className="data-story-content">
                 <span>PLACE & ADMINISTRATION</span>
-                <h3>A province defined by its geographic structure.</h3>
+                <h3>{householdsInsight}</h3>
                 <div className="story-stat-pair story-stat-triple">
                   <div><strong>{municipalityCount ?? '—'}</strong><span>Municipalities</span></div>
                   <div><strong>{barangayCount ?? '—'}</strong><span>Barangays</span></div>
@@ -330,41 +503,49 @@ export default function Home() {
 
           <div className="snapshot-grid">
             <article className="snapshot-card snapshot-card-featured">
+              <span className="snapshot-card-icon"><Users size={17} aria-hidden="true" /></span>
               <span>2024 TOTAL POPULATION</span>
               <strong>{population2024}</strong>
               <small>Source: {population.source}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><BriefcaseBusiness size={17} aria-hidden="true" /></span>
               <span>2024 EMPLOYMENT RATE</span>
               <strong>{employment2024}</strong>
               <small>Source: {employment.source}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><Users size={17} aria-hidden="true" /></span>
               <span>2024 LABOR FORCE</span>
               <strong>{laborForce2024}</strong>
               <small>Source: {employment.source}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><BookOpen size={17} aria-hidden="true" /></span>
               <span>2024 LITERACY RATE</span>
               <strong>{literacy2024}</strong>
               <small>Source: {population.source}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><GraduationCap size={17} aria-hidden="true" /></span>
               <span>2025 HIGHER EDUCATION ENROLLMENT</span>
               <strong>{higherEdEnrollment2025}</strong>
               <small>{higherEducation.source ? `Source: ${higherEducation.source}` : 'Source not specified in supplied profile'}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><GraduationCap size={17} aria-hidden="true" /></span>
               <span>2025 HIGHER EDUCATION GRADUATES</span>
               <strong>{higherEdGraduates2025}</strong>
               <small>{higherEducation.source ? `Source: ${higherEducation.source}` : 'Source not specified in supplied profile'}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><Building2 size={17} aria-hidden="true" /></span>
               <span>TESDA-REGISTERED TVET PROVIDERS</span>
               <strong>{tvet.institutions.tesdaRegisteredProviders}</strong>
               <small>Source: {tvet.institutions.source}</small>
             </article>
             <article className="snapshot-card">
+              <span className="snapshot-card-icon"><BookMarked size={17} aria-hidden="true" /></span>
               <span>REGISTERED TVET PROGRAMS</span>
               <strong>{tvet.institutions.registeredPrograms}</strong>
               <small>Source: {tvet.institutions.source}</small>
@@ -384,13 +565,15 @@ export default function Home() {
           </div>
 
           <div className="geographic-grid">
-            {geographic.map((item) => (
-              <article className="geo-card" key={item.label}>
+            {geographic.map((item) => {
+              const GeoIcon = getGeoIcon(item.label)
+              return <article className="geo-card" key={item.label}>
+                <span className="geo-card-icon"><GeoIcon size={17} aria-hidden="true" /></span>
                 <span>{item.label}</span>
                 <strong>{item.value ?? '—'}</strong>
                 {item.source && <small>Source: {item.source}</small>}
               </article>
-            ))}
+            })}
           </div>
         </div>
       </section>

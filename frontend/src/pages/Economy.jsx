@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import {
   ArrowRight,
   Compass,
@@ -13,37 +13,59 @@ import {
   ShieldCheck,
   Users,
   Waves,
+  LandPlot,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import StatusState from '../components/StatusState.jsx'
 import '../styles/economy.css'
 import { provincialProfile } from '../data/provincialProfile.js'
+import { toNumber, formatNumber } from '../utils/numbers.js'
+import { LazyDonutChart, LazyFunnelChart, LazyGroupedBar, LazySparkline, LazyTrendChart } from '../components/lazy.js'
+import ChartTable from '../components/ChartTable.jsx'
+
+
+function getProfileIcon(label = '') {
+  const value = label.toLowerCase()
+  if (value.includes('population') || value.includes('household') || value.includes('labor')) return Users
+  if (value.includes('employment') || value.includes('unemployment') || value.includes('underemployment')) return BriefcaseBusiness
+  if (value.includes('education') || value.includes('enrollment') || value.includes('graduate')) return GraduationCap
+  if (value.includes('tvet') || value.includes('program') || value.includes('training')) return Wrench
+  if (value.includes('relig')) return Database
+  if (value.includes('coastal') || value.includes('water') || value.includes('marine')) return Waves
+  if (value.includes('forest') || value.includes('land') || value.includes('area')) return LandPlot
+  if (value.includes('distance') || value.includes('location') || value.includes('region')) return MapPinned
+  return Compass
+}
 
 function FactCard({ value, label }) {
+  const Icon = getProfileIcon(label)
   return (
     <article className="economy-fact-card">
+      <span className="economy-card-icon economy-fact-icon"><Icon size={17} aria-hidden="true" /></span>
       <strong>{value}</strong>
       <span>{label}</span>
     </article>
   )
 }
 
-function DataRow({ label, value, source }) {
+function DataRow({ label, value, unit, source }) {
   return (
     <div className="economy-data-row">
       <div>
         <span className="economy-data-label">{label}</span>
         {source && <small>Source: {source}</small>}
       </div>
-      <strong>{value ?? 'No available data'}</strong>
+      <strong>{value ?? '—'}{value != null && unit ? ` ${unit}` : ''}</strong>
     </div>
   )
 }
 
 function SeriesCard({ label, values, unit }) {
+  const Icon = getProfileIcon(label)
   return (
     <article className="population-series-card">
       <div className="population-series-heading">
-        <span>{label}</span>
+        <span className="economy-heading-with-icon"><Icon size={15} aria-hidden="true" />{label}</span>
         {unit && <small>{unit}</small>}
       </div>
       <div className="population-series-values">
@@ -59,10 +81,11 @@ function SeriesCard({ label, values, unit }) {
 }
 
 function PeriodSeriesCard({ label, values }) {
+  const Icon = getProfileIcon(label)
   return (
     <article className="population-series-card">
       <div className="population-series-heading">
-        <span>{label}</span>
+        <span className="economy-heading-with-icon"><Icon size={15} aria-hidden="true" />{label}</span>
       </div>
       <div className="population-series-values">
         {values.map((item) => (
@@ -78,10 +101,11 @@ function PeriodSeriesCard({ label, values }) {
 
 
 function EmploymentSeriesCard({ label, values, unit }) {
+  const Icon = getProfileIcon(label)
   return (
     <article className="employment-series-card">
       <div className="employment-series-heading">
-        <span>{label}</span>
+        <span className="economy-heading-with-icon"><Icon size={15} aria-hidden="true" />{label}</span>
         {unit && <small>{unit}</small>}
       </div>
       <div className="employment-series-values">
@@ -97,6 +121,32 @@ function EmploymentSeriesCard({ label, values, unit }) {
 }
 
 
+
+function MetricKpiCard({ label, value, unit, note, sparkline, formatter }) {
+  const Icon = getProfileIcon(label)
+  return (
+    <article className="employment-kpi-card">
+      <div className="employment-kpi-head">
+        <span className="economy-heading-with-icon"><Icon size={15} aria-hidden="true" />{label}</span>
+        {unit && <small>{unit}</small>}
+      </div>
+      <strong>{value ?? '—'}</strong>
+      {sparkline && (
+        <div className="employment-kpi-sparkline">
+          <LazySparkline
+            data={sparkline}
+            title={`${label} reference-year sparkline`}
+            description={`Reference-year values for ${label}.`}
+            formatter={formatter}
+            label={label}
+            height={44}
+          />
+        </div>
+      )}
+      {note && <p className="employment-kpi-note">{note}</p>}
+    </article>
+  )
+}
 
 function InstitutionList({ title, items, label }) {
   return (
@@ -146,8 +196,8 @@ function TVETPerformanceCard({ label, values }) {
   return (
     <article className="tvet-performance-card">
       <div className="tvet-performance-heading">
-        <span>{label}</span>
-        <BadgeCheck size={18} />
+        <span className="economy-heading-with-icon"><BadgeCheck size={16} aria-hidden="true" />{label}</span>
+        <BadgeCheck size={18} aria-hidden="true" />
       </div>
       <strong>{current}</strong>
       <small>2024</small>
@@ -163,12 +213,6 @@ function TVETPerformanceCard({ label, values }) {
   )
 }
 
-
-function toNumeric(value) {
-  if (value === null || value === undefined || value === '' || value === '-') return null
-  const numeric = Number(String(value).replaceAll(',', ''))
-  return Number.isFinite(numeric) ? numeric : null
-}
 
 function DataVisualCard({ kicker, title, note, children, className = '' }) {
   return (
@@ -187,7 +231,7 @@ function DataVisualCard({ kicker, title, note, children, className = '' }) {
 
 function PopulationLineChart({ values }) {
   const points = values
-    .map((item) => ({ year: item.year, value: toNumeric(item.value) }))
+    .map((item) => ({ year: item.year, value: toNumber(item.value) }))
     .filter((item) => item.value !== null)
 
   const max = Math.max(...points.map((item) => item.value), 1)
@@ -235,12 +279,20 @@ function PopulationLineChart({ values }) {
           )
         })}
       </svg>
+      <details className="visual-table-fallback">
+        <summary>View data table</summary>
+        <ChartTable
+          data={values}
+          columns={[{ key: 'year', label: 'Year' }, { key: 'value', label: 'Population' }]}
+          ariaLabel="Population trend data table"
+        />
+      </details>
     </div>
   )
 }
 
 function MultiSeriesRateChart({ series }) {
-  const allPoints = series.flatMap((group) => group.values.map((item) => toNumeric(item.value)).filter((value) => value !== null))
+  const allPoints = series.flatMap((group) => group.values.map((item) => toNumber(item.value)).filter((value) => value !== null))
   const max = Math.max(...allPoints, 100)
   const chartWidth = 640
   const chartHeight = 250
@@ -272,7 +324,7 @@ function MultiSeriesRateChart({ series }) {
           )
         })}
         {series.map((group) => {
-          const valid = group.values.map((item, index) => ({ ...item, index, numeric: toNumeric(item.value) })).filter((item) => item.numeric !== null)
+          const valid = group.values.map((item, index) => ({ ...item, index, numeric: toNumber(item.value) })).filter((item) => item.numeric !== null)
           const points = valid.map((item) => {
             const point = pointAt(item.index, item.numeric)
             return `${point.x},${point.y}`
@@ -292,12 +344,20 @@ function MultiSeriesRateChart({ series }) {
           return <text key={year} x={point.x} y={chartHeight - 14} textAnchor="middle" className="visual-axis-label">{year}</text>
         })}
       </svg>
+      <details className="visual-table-fallback">
+        <summary>View data table</summary>
+        <ChartTable
+          data={years.map((year) => Object.fromEntries([['year', year], ...series.map((group) => [group.key, group.values.find((item) => item.year === year)?.value ?? null])]))}
+          columns={[{ key: 'year', label: 'Year' }, ...series.map((group) => ({ key: group.key, label: group.label }))]}
+          ariaLabel="Employment indicators data table"
+        />
+      </details>
     </div>
   )
 }
 
 function MultiSeriesCountChart({ series, ariaLabel = 'Provincial count series' }) {
-  const allPoints = series.flatMap((group) => group.values.map((item) => toNumeric(item.value)).filter((value) => value !== null))
+  const allPoints = series.flatMap((group) => group.values.map((item) => toNumber(item.value)).filter((value) => value !== null))
   const max = Math.max(...allPoints, 1)
   const chartWidth = 640
   const chartHeight = 250
@@ -330,7 +390,7 @@ function MultiSeriesCountChart({ series, ariaLabel = 'Provincial count series' }
           )
         })}
         {series.map((group) => {
-          const valid = group.values.map((item) => ({ ...item, index: years.indexOf(item.year), numeric: toNumeric(item.value) })).filter((item) => item.numeric !== null && item.index >= 0)
+          const valid = group.values.map((item) => ({ ...item, index: years.indexOf(item.year), numeric: toNumber(item.value) })).filter((item) => item.numeric !== null && item.index >= 0)
           const points = valid.map((item) => {
             const point = pointAt(item.index, item.numeric)
             return `${point.x},${point.y}`
@@ -355,6 +415,14 @@ function MultiSeriesCountChart({ series, ariaLabel = 'Provincial count series' }
           return <text key={year} x={point.x} y={chartHeight - 14} textAnchor="middle" className="visual-axis-label">{year}</text>
         })}
       </svg>
+      <details className="visual-table-fallback">
+        <summary>View data table</summary>
+        <ChartTable
+          data={years.map((year) => Object.fromEntries([['year', year], ...series.map((group) => [group.key, group.values.find((item) => item.year === year)?.value ?? null])]))}
+          columns={[{ key: 'year', label: 'Year' }, ...series.map((group) => ({ key: group.key, label: group.label }))]}
+          ariaLabel="Provincial count series data table"
+        />
+      </details>
     </div>
   )
 }
@@ -362,12 +430,12 @@ function MultiSeriesCountChart({ series, ariaLabel = 'Provincial count series' }
 function GroupedBarChart({ groups, formatter = (value) => value.toLocaleString() }) {
   const numericGroups = groups.map((group) => ({
     ...group,
-    value: toNumeric(group.value),
+    value: toNumber(group.value),
   }))
   const max = Math.max(...numericGroups.map((item) => item.value ?? 0), 1)
 
   return (
-    <div className="visual-bar-chart">
+    <div className="visual-bar-chart" role="img" aria-label="Provincial grouped comparison">
       {numericGroups.map((group) => {
         const width = group.value === null ? 0 : Math.max(4, (group.value / max) * 100)
         return (
@@ -380,6 +448,14 @@ function GroupedBarChart({ groups, formatter = (value) => value.toLocaleString()
           </div>
         )
       })}
+      <details className="visual-table-fallback">
+        <summary>View data table</summary>
+        <ChartTable
+          data={numericGroups}
+          columns={[{ key: 'label', label: 'Category' }, { key: 'value', label: 'Value', formatter }]}
+          ariaLabel="Provincial grouped comparison data table"
+        />
+      </details>
     </div>
   )
 }
@@ -427,7 +503,7 @@ function TVETProviderDirectory({ providers }) {
       </div>
 
       {filtered.length === 0 && (
-        <div className="tvet-empty">No listed provider matches your search.</div>
+        <StatusState compact title="No provider found" description="No listed provider matches your search." />
       )}
     </div>
   )
@@ -506,7 +582,7 @@ function ReligiousAffiliationTable({ data }) {
       </div>
 
       {filtered.length === 0 && (
-        <div className="religion-empty">No municipality or city matches your search.</div>
+        <StatusState compact title="No municipality found" description="No municipality or city matches your search." />
       )}
 
       <p className="religion-source-note">
@@ -601,11 +677,11 @@ export default function Economy() {
       <section className="profile-section-index" aria-label="Provincial profile sections">
         <div className="container">
           <div className="profile-section-index-inner">
-            <div>
-              <span className="profile-section-index-kicker">EXPLORE THE PROFILE</span>
+            <div className="profile-section-index-label">
+              <span>EXPLORE THE PROFILE</span>
               <strong>Jump to a data section</strong>
             </div>
-            <nav>
+            <nav className="profile-section-index-links" aria-label="Jump to data section">
               <a href="#key-indicators">At a glance</a>
               <a href="#geographic">Geography</a>
               <a href="#population">Population</a>
@@ -675,7 +751,7 @@ export default function Economy() {
                 .map((item) => (
                   <div className="profile-meter-row" key={item.label}>
                     <span>{item.label}</span>
-                    <div className="profile-meter-track"><i className="profile-meter-fill" style={{ width: `${Math.min(100, Math.max(10, (toNumeric(item.value) || 0) / Math.max(...administration.map((entry) => toNumeric(entry.value) || 0)) * 100))}%` }} /></div>
+                    <div className="profile-meter-track"><i className="profile-meter-fill" style={{ width: `${Math.min(100, Math.max(10, (toNumber(item.value) || 0) / Math.max(...administration.map((entry) => toNumber(entry.value) || 0)) * 100))}%` }} /></div>
                     <strong>{item.value}</strong>
                   </div>
                 ))}
@@ -690,45 +766,45 @@ export default function Economy() {
             <span className="eyebrow eyebrow-dark">DATA VISUALS</span>
             <h2>Read the profile at a glance.</h2>
             <p>Selected indicators are visualized without changing the values, reference periods, or source notes in the supplied profile.</p>
+            <div className="profile-data-note"><strong>Data rule:</strong> values are shown as supplied; unavailable values are displayed as —.</div>
           </div>
 
           <div className="visual-dashboard-grid">
-            <DataVisualCard
-              kicker="POPULATION"
-              title="Total population trend"
-              note={`Source: ${population.source}`}
-            >
-              <PopulationLineChart values={population.totalPopulation} />
+            <DataVisualCard kicker="POPULATION" title="Population reference trend" note={`Source: ${population.source}`}>
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyTrendChart
+                  data={population.totalPopulation}
+                  series={[{ key: 'value', label: 'Population' }]}
+                  title="Total population"
+                  description="Population values recorded for the supplied reference years."
+                  formatter={(value) => formatNumber(value)}
+                  ariaLabel="Total population reference trend"
+                />
+              </Suspense>
             </DataVisualCard>
 
-            <DataVisualCard
-              kicker="EMPLOYMENT"
-              title="Labor market rates"
-              note={`Source: ${employment.source}`}
-            >
-              <MultiSeriesRateChart
-                series={[
-                  { label: 'Participation', key: 'participation', values: employment.laborForceParticipationRate },
-                  { label: 'Employment', key: 'employment', values: employment.employmentRate },
-                  { label: 'Unemployment', key: 'unemployment', values: employment.unemploymentRate },
-                ]}
-              />
-            </DataVisualCard>
-
-            <DataVisualCard
-              kicker="SOCIAL INDICATORS"
-              title="Poverty & subsistence"
-              note={`Source: ${population.source}`}
-            >
-              <GroupedBarChart
-                formatter={(value) => `${value}%`}
-                groups={[
-                  { label: 'Families · Poverty 2023', value: population.povertyIncidenceFamilies.find((item) => item.year === '2023')?.value },
-                  { label: 'Population · Poverty 2023', value: population.povertyIncidencePopulation.find((item) => item.year === '2023')?.value },
-                  { label: 'Families · Subsistence 2023', value: population.subsistenceIncidenceFamilies.find((item) => item.year === '2023')?.value },
-                  { label: 'Population · Subsistence 2023', value: population.subsistenceIncidencePopulation.find((item) => item.year === '2023')?.value },
-                ]}
-              />
+            <DataVisualCard kicker="SOCIAL INDICATORS" title="Poverty and subsistence, 2018–2023" note={`Source: ${population.source}`}>
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyTrendChart
+                  data={population.povertyIncidenceFamilies.map((item, index) => ({
+                    year: item.year,
+                    povertyFamilies: toNumber(item.value),
+                    povertyPopulation: toNumber(population.povertyIncidencePopulation[index]?.value),
+                    subsistenceFamilies: toNumber(population.subsistenceIncidenceFamilies[index]?.value),
+                    subsistencePopulation: toNumber(population.subsistenceIncidencePopulation[index]?.value),
+                  }))}
+                  series={[
+                    { key: 'povertyFamilies', label: 'Poverty · families' },
+                    { key: 'povertyPopulation', label: 'Poverty · population' },
+                    { key: 'subsistenceFamilies', label: 'Subsistence · families' },
+                    { key: 'subsistencePopulation', label: 'Subsistence · population' },
+                  ]}
+                  title="Poverty and subsistence incidence"
+                  description="Incidence values across the supplied 2018, 2021, and 2023 reference years."
+                  formatter={(value) => `${value}%`}
+                  ariaLabel="Poverty and subsistence incidence trend"
+                />
+              </Suspense>
             </DataVisualCard>
           </div>
         </div>
@@ -803,18 +879,64 @@ export default function Economy() {
 
           <div className="population-series-grid">
             <PeriodSeriesCard label="Population Growth Rate" values={population.growthRate} />
-            <SeriesCard label="Population Density" values={population.density} unit="persons/km" />
+            <SeriesCard label="Population Density" values={population.density} unit="persons/km²" />
             <SeriesCard label="Number of Households" values={population.households} />
             <SeriesCard label="Average Household Size" values={population.averageHouseholdSize} />
           </div>
 
 
           <div className="visual-two-column">
-            <DataVisualCard kicker="HOUSEHOLDS" title="Household count" note={`Source: ${population.source}`}>
-              <GroupedBarChart groups={population.households.map((item) => ({ label: item.year, value: item.value }))} />
+            <DataVisualCard kicker="SEX DISTRIBUTION" title="Male and female population" note={`Source: ${population.source}. 2024 sex-specific values are unavailable.`}>
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyGroupedBar
+                  data={population.totalPopulation.map((item, index) => ({
+                    year: item.year,
+                    male: toNumber(population.malePopulation[index]?.value),
+                    female: toNumber(population.femalePopulation[index]?.value),
+                  }))}
+                  categoryKey="year"
+                  series={[
+                    { key: 'male', label: 'Male' },
+                    { key: 'female', label: 'Female' },
+                  ]}
+                  title="Male and female population"
+                  description="Sex-specific population values from the supplied reference years."
+                  ariaLabel="Male and female population columns"
+                  formatter={(value) => formatNumber(value)}
+                />
+              </Suspense>
             </DataVisualCard>
-            <DataVisualCard kicker="DENSITY" title="Population density" note={`Unit: persons/km · Source: ${population.source}`}>
-              <GroupedBarChart groups={population.density.map((item) => ({ label: item.year, value: item.value }))} formatter={(value) => `${value} persons/km`} />
+            <DataVisualCard kicker="HOUSEHOLDS" title="Households and average household size" note={`Source: ${population.source}`}>
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyGroupedBar
+                  data={population.households.map((item, index) => ({
+                    year: item.year,
+                    households: toNumber(item.value),
+                    averageSize: toNumber(population.averageHouseholdSize[index]?.value),
+                  }))}
+                  categoryKey="year"
+                  series={[
+                    { key: 'households', label: 'Households' },
+                    { key: 'averageSize', label: 'Average household size' },
+                  ]}
+                  title="Households and average household size"
+                  description="Household counts and average household size are displayed together by reference year; scales remain separate in the data table."
+                  ariaLabel="Households and average household size columns"
+                  formatter={(value) => formatNumber(value)}
+                />
+              </Suspense>
+            </DataVisualCard>
+            <DataVisualCard kicker="DENSITY" title="Population density" note={`Unit: persons/km² · Source: ${population.source}`}>
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyTrendChart
+                  data={population.density}
+                  series={[{ key: 'value', label: 'Density' }]}
+                  title="Population density"
+                  description="Population density values from the supplied reference years."
+                  formatter={(value) => `${value} persons/km²`}
+                  ariaLabel="Population density trend"
+                />
+              </Suspense>
             </DataVisualCard>
           </div>
         </div>
@@ -1066,6 +1188,28 @@ export default function Economy() {
             <TVETPerformanceCard label="TVET Certification Passers" values={tvet.performance.certificationPassers} />
           </div>
 
+          <div className="tvet-visual-grid">
+            <DataVisualCard kicker="2024 TVET PIPELINE" title="From enrollment to certification" note={`Source: ${tvet.source}. Only the supplied 2024 values are included in the funnel.`}>
+              <LazyFunnelChart
+                data={[
+                  { name: 'Enrollment / Enrollees', value: toNumber(tvet.performance.enrollment.find((item) => item.year === '2024')?.value) },
+                  { name: 'Graduates', value: toNumber(tvet.performance.graduates.find((item) => item.year === '2024')?.value) },
+                  { name: 'Certification Passers', value: toNumber(tvet.performance.certificationPassers.find((item) => item.year === '2024')?.value) },
+                ]}
+                title="2024 TVET enrollment-to-certification funnel"
+                description="Reported 2024 TESDA performance counts."
+                formatter={(value) => formatNumber(value)}
+                height={320}
+              />
+            </DataVisualCard>
+
+            <DataVisualCard kicker="HIGHER EDUCATION" title="Graduates by field" note={higherEducation.source ? `Source: ${higherEducation.source}` : 'Source not specified in supplied profile. Unavailable field values remain —.'}>
+              <LazyGroupedBar
+                groups={higherEducation.graduateFields.map((field) => ({ label: field.name, value: field.value }))}
+                formatter={(value) => formatNumber(value)}
+              />
+            </DataVisualCard>
+          </div>
 
           <DataVisualCard kicker="2024 TVET PERFORMANCE" title="Reported 2024 TVET counts" note={`Source: ${tvet.source}. Earlier periods are displayed as supplied (-) where reported.`}>
             <GroupedBarChart
@@ -1140,40 +1284,40 @@ export default function Economy() {
             </div>
           </div>
 
-          <div className="employment-series-grid">
-            <EmploymentSeriesCard
-              label="Labor Force Participation Rate"
-              values={employment.laborForceParticipationRate}
-              unit="percent"
-            />
-            <EmploymentSeriesCard
+          <div className="employment-kpi-grid">
+            <MetricKpiCard
               label="Employment Rate"
-              values={employment.employmentRate}
-              unit="percent"
+              value={employment.employmentRate.find((item) => item.year === '2024')?.value ? `${employment.employmentRate.find((item) => item.year === '2024').value}%` : '—'}
+              unit="2024"
+              sparkline={employment.employmentRate.map((item) => ({ year: item.year, value: toNumber(item.value) }))}
+              formatter={(value) => `${value}%`}
             />
-            <EmploymentSeriesCard
+            <MetricKpiCard
               label="Unemployment Rate"
-              values={employment.unemploymentRate}
-              unit="percent"
+              value={employment.unemploymentRate.find((item) => item.year === '2024')?.value ? `${employment.unemploymentRate.find((item) => item.year === '2024').value}%` : '—'}
+              unit="2024"
+              sparkline={employment.unemploymentRate.map((item) => ({ year: item.year, value: toNumber(item.value) }))}
+              formatter={(value) => `${value}%`}
             />
-            <EmploymentSeriesCard
+            <MetricKpiCard
               label="Underemployment Rate"
-              values={employment.underemploymentRate}
-              unit="percent"
+              value={employment.underemploymentRate.find((item) => item.year === '2024')?.value ? `${employment.underemploymentRate.find((item) => item.year === '2024').value}%` : '—'}
+              unit="2024"
+              sparkline={employment.underemploymentRate.map((item) => ({ year: item.year, value: toNumber(item.value) }))}
+              formatter={(value) => `${value}%`}
             />
-            <EmploymentSeriesCard
+            <MetricKpiCard
               label="Labor Force"
-              values={employment.laborForce}
+              value={employment.laborForce.find((item) => item.year === '2024')?.value}
+              unit="2024"
+              note={employment.laborForce.note}
             />
-          </div>
-
-          <div className="profile-employment-trend">
-            <DataVisualCard kicker="WORKFORCE" title="Labor force across reference years" note={`Source: ${employment.source}`}>
-              <MultiSeriesCountChart
-                ariaLabel="Labor force across the supplied reference years"
-                series={[{ label: 'Labor force', key: 'labor-force', values: employment.laborForce }]}
-              />
-            </DataVisualCard>
+            <MetricKpiCard
+              label="Labor Force Participation Rate"
+              value={employment.laborForceParticipationRate.find((item) => item.year === '2024')?.value ? `${employment.laborForceParticipationRate.find((item) => item.year === '2024').value}%` : '—'}
+              unit="2024"
+              note={employment.laborForceParticipationRate.note}
+            />
           </div>
 
           <div className="employment-source-note">
@@ -1191,6 +1335,18 @@ export default function Economy() {
             <p>
               This section presents the forest and protected-area figures exactly as provided.
             </p>
+          </div>
+
+          <div className="visual-two-column natural-assets-visuals">
+            <DataVisualCard kicker="FOREST LAND" title="Forest land composition" note="Units: hectares. Source notes are retained from the supplied profile.">
+              <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+                <LazyDonutChart
+                  data={naturalAssets.filter((item) => ['Closed forest', 'Open Forest', 'Mangrove Forest'].includes(item.label)).map((item) => ({ name: item.label, value: toNumber(item.value) }))}
+                  title="Forest land composition"
+                  ariaLabel="Forest land composition: closed forest, open forest, and mangrove forest"
+                />
+              </Suspense>
+            </DataVisualCard>
           </div>
 
           <div className="economy-assets-grid">

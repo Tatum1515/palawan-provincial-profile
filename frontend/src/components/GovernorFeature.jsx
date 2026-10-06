@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-const GOVERNOR_IMAGE = '/images/governor-amy-roa-alvarez.png'
+const GOVERNOR_IMAGE = '/images/governor-amy-roa-alvarez.webp'
 
 export default function GovernorFeature() {
   return (

@@ -4,16 +4,17 @@ export const provincialProfile = {
   geographicAdministrative: [
     { label: 'Region', value: 'IV-B Mimaropa' },
     { label: 'Distance from Manila', value: '593 kms (368 miles)' },
-    { label: 'Total Land Area', value: '17,030.75' },
-    { label: 'Forest Land Area', value: '705,061', source: 'NAMRIA/DENR 2025' },
-    { label: 'Closed forest', value: '163,922' },
-    { label: 'Open Forest', value: '480,691' },
-    { label: 'Mangrove Forest', value: '60,448' },
-    { label: 'Alienable and Disposable Land', value: '453,700 hectares or 4537 km' },
-    { label: 'Marine Protected Area under NIPAS', value: '82,820', source: 'PRM 2024' },
+    { label: 'Total Land Area', value: '17,030.75', unit: 'km²' },
+    { label: 'Forest Land Area', value: '705,061', unit: 'hectares', source: 'NAMRIA/DENR 2025' },
+    { label: 'Closed forest', value: '163,922', unit: 'hectares' },
+    { label: 'Open Forest', value: '480,691', unit: 'hectares' },
+    { label: 'Mangrove Forest', value: '60,448', unit: 'hectares' },
+    { label: 'Alienable and Disposable Land', value: '453,700 hectares or 4,537 km²' },
+    { label: 'Marine Protected Area under NIPAS', value: '82,820', unit: 'hectares', source: 'PRM 2024' },
     {
       label: 'Terrestrial Protected Area including inland wetland and caves under NIPAS',
       value: '334,477',
+      unit: 'hectares',
     },
     { label: 'Number of Community-Based Forest Management Agreements', value: '37' },
     { label: 'Coastal Length', value: null },
@@ -54,9 +55,9 @@ export const provincialProfile = {
       { period: '2020-2024', value: '0.74' },
     ],
     density: [
-      { year: '2015', value: '58', unit: 'persons/km' },
-      { year: '2020', value: '64', unit: 'persons/km' },
-      { year: '2024', value: '66', unit: 'persons/km' },
+      { year: '2015', value: '58', unit: 'persons/km²' },
+      { year: '2020', value: '64', unit: 'persons/km²' },
+      { year: '2024', value: '66', unit: 'persons/km²' },
     ],
     households: [
       { year: '2015', value: '195,074' },
@@ -94,11 +95,14 @@ export const provincialProfile = {
 
 
   employment: {
-    laborForceParticipationRate: [
+    laborForceParticipationRate: Object.assign([
       { year: '2014', value: '30.97' },
       { year: '2022', value: '53.22' },
       { year: '2024', value: '69.56' },
-    ],
+    ], {
+      comparable: false,
+      note: '2014, 2022, and 2024 labor-force participation figures are retained as supplied, but should not be interpreted as a directly comparable trend because the underlying survey/data context differs.',
+    }),
     employmentRate: [
       { year: '2014', value: '93.38' },
       { year: '2022', value: '89.31' },
@@ -114,11 +118,14 @@ export const provincialProfile = {
       { year: '2022', value: '9.15' },
       { year: '2024', value: '22.47' },
     ],
-    laborForce: [
+    laborForce: Object.assign([
       { year: '2014', value: '471,768' },
       { year: '2022', value: '296,359' },
       { year: '2024', value: '305,057' },
-    ],
+    ], {
+      comparable: false,
+      note: '2014, 2022, and 2024 labor-force counts are retained as supplied, but should not be interpreted as a directly comparable trend because the underlying survey/data context differs.',
+    }),
     source: 'CBMS Data 2014, 2022, 2024 Survey',
   },
 

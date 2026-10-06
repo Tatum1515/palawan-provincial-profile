@@ -1,0 +1,47 @@
+.status-state {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 150px;
+  padding: 28px 24px;
+  border: 1px dashed #cbd9d4;
+  border-radius: 14px;
+  background: #fbfcfb;
+  color: #52645e;
+}
+
+.status-state-icon {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: #eaf3ef;
+  color: #176653;
+}
+
+.status-state-copy { min-width: 0; }
+.status-state-copy strong { display: block; color: #233a34; font-size: 14px; line-height: 1.4; }
+.status-state-copy p { margin: 5px 0 0; color: #697a74; font-size: 13px; line-height: 1.6; }
+.status-state-action { margin-top: 14px; }
+.status-state-loading { border-style: solid; background: #f5f9f7; }
+.status-state-loading .status-state-icon { background: #e3f0eb; }
+.status-state-error { border-color: #e3c4bd; background: #fff9f7; color: #8d493d; }
+.status-state-error .status-state-icon { background: #f6e5e0; color: #9a493c; }
+.status-state-error .status-state-copy strong { color: #7d3e35; }
+.status-state-empty .status-state-icon { background: #edf3f0; }
+.status-state-compact { min-height: 92px; padding: 18px; }
+.status-state-compact .status-state-icon { flex-basis: 38px; width: 38px; height: 38px; border-radius: 10px; }
+.status-state-spin { animation: status-state-spin .9s linear infinite; }
+
+@keyframes status-state-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .status-state-spin { animation: none; }
+}
+
+@media (max-width: 560px) {
+  .status-state { min-height: 130px; padding: 22px 18px; gap: 11px; }
+  .status-state-icon { flex-basis: 40px; width: 40px; height: 40px; }
+}

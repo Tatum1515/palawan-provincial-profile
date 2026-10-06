@@ -1,0 +1,39 @@
+.chart-card { background: #fff; border: 1px solid var(--line, #d9e4df); min-width: 0; }
+.chart-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 20px 22px 0; }
+.chart-card-head h3 { margin: 0; font-size: 18px; line-height: 1.25; }
+.chart-card-head p { margin: 6px 0 0; max-width: 700px; color: var(--muted, #667872); font-size: 12px; line-height: 1.55; }
+.chart-view-toggle { display: inline-flex; flex: 0 0 auto; border: 1px solid var(--line, #d9e4df); background: #f7faf8; }
+.chart-view-toggle button { border: 0; background: transparent; color: var(--muted, #667872); min-height: 44px; padding: 8px 11px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.chart-view-toggle button + button { border-left: 1px solid var(--line, #d9e4df); }
+.chart-view-toggle button.is-active { background: #0a3c31; color: #fff; }
+.chart-card-body { padding: 14px 16px 18px; min-width: 0; }
+.chart-responsive { width: 100%; min-width: 0; }
+.chart-empty { display: grid; place-items: center; min-height: 180px; color: var(--muted, #667872); font-size: 13px; border: 1px dashed #cbd8d3; }
+.chart-note { margin: 4px 2px 0; color: var(--muted, #667872); font-size: 11px; line-height: 1.55; }
+.chart-table-wrap { width: 100%; overflow-x: auto; }
+.chart-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.chart-table th, .chart-table td { padding: 10px 12px; border-bottom: 1px solid var(--line, #d9e4df); text-align: left; white-space: nowrap; }
+.chart-table th { background: #f4f8f6; color: #40574f; font-size: var(--text-xs); letter-spacing: .06em; text-transform: uppercase; }
+.chart-table td { color: #334840; }
+.chart-sparkline { min-width: 70px; }
+.chart-sparkline-empty { color: var(--muted, #667872); font-weight: 700; }
+@media (max-width: 720px) {
+  .chart-card-head { flex-direction: column; }
+  .chart-view-toggle { width: 100%; }
+  .chart-view-toggle button { flex: 1; }
+  .chart-card-body { padding-inline: 10px; }
+}
+
+
+/* Step D — responsive chart QA */
+.chart-card-body { min-width: 0; }
+.chart-responsive { overflow: visible; }
+
+.donut-chart-wrapper .chart-card-body { min-height: 0; }
+
+@media (max-width: 720px) {
+  .chart-card-head { gap: 12px; }
+  .chart-view-toggle button { min-height: 44px; }
+  .municipality-population-chart-wrapper .chart-card-body { overflow-x: auto; }
+  .municipality-population-chart-wrapper .chart-responsive { min-width: 620px; }
+}

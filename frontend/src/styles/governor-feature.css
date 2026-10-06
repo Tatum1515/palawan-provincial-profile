@@ -42,7 +42,7 @@
   background: rgba(7, 47, 38, .92);
   color: #dbeae4;
   padding: 9px 11px;
-  font-size: 9px;
+  font-size: var(--text-xs);
   letter-spacing: .16em;
   font-weight: 800;
 }
@@ -93,7 +93,7 @@
 .governor-meta span {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--text-xs);
   letter-spacing: .13em;
 }
 

@@ -1,21 +1,18 @@
-import { ArrowRight, Building2, Database, MapPin, Printer, Search, Users, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowRight, BarChart3, Building2, Database, FileText, GitCompare, MapPin, Printer, Search, SlidersHorizontal, Users, X } from 'lucide-react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { provincialProfile } from '../data/provincialProfile.js'
+import { toNumber } from '../utils/numbers.js'
 import { getMunicipalityLogo } from '../data/municipalityLogos.js'
+import { buildReligionDonutData, buildReligionStackedData, cleanMunicipalityName, RELIGION_COLUMNS as religionColumns } from '../utils/locationChartData.js'
+import StatusState from '../components/StatusState.jsx'
+import DataMeta from '../components/DataMeta.jsx'
 import '../styles/locations.css'
 
-const religionColumns = [
-  ['romanCatholic', 'Roman Catholic'],
-  ['islam', 'Islam'],
-  ['iglesiaNiCristo', 'Iglesia ni Cristo'],
-  ['protestant', 'Protestant'],
-  ['seventhDayAdventist', 'Seventh-day Adventist'],
-  ['otherReligion', 'Other Religion'],
-  ['noReligion', 'No Religion'],
-]
-
-const toNumber = (value) => Number(String(value ?? 0).replace(/,/g, '')) || 0
+const PalawanMap = lazy(() => import('../components/PalawanMap.jsx'))
+const DonutChart = lazy(() => import('../components/charts/DonutChart.jsx'))
+const MunicipalityPopulationChart = lazy(() => import('../components/MunicipalityPopulationChart.jsx'))
+const ReligionStackedChart = lazy(() => import('../components/ReligionStackedChart.jsx'))
 
 export default function Locations() {
   const municipalities = provincialProfile.religiousAffiliation.municipalities
@@ -23,6 +20,8 @@ export default function Locations() {
   const [query, setQuery] = useState('')
   const [selectedName, setSelectedName] = useState(null)
   const [compareNames, setCompareNames] = useState([])
+  const [religionSort, setReligionSort] = useState('romanCatholic')
+  const [populationSort, setPopulationSort] = useState('desc')
 
   const filteredMunicipalities = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -31,12 +30,36 @@ export default function Locations() {
   }, [municipalities, query])
 
   const selected = municipalities.find((item) => item.municipality === selectedName) || null
-  const maxPopulation = Math.max(...municipalities.map((item) => toNumber(item.totalPopulation)), 1)
+  const maxPopulation = Math.max(...municipalities.map((item) => Number(String(item.totalPopulation ?? 0).replace(/,/g, '')) || 0), 1)
+  const selectedReligionData = selected ? buildReligionDonutData(selected) : []
+  const religionStackedData = buildReligionStackedData(municipalities)
+  const sortedPopulation = useMemo(() => {
+    const rows = [...filteredMunicipalities]
+    rows.sort((a, b) => {
+      const left = toNumber(a.totalPopulation) ?? -1
+      const right = toNumber(b.totalPopulation) ?? -1
+      return populationSort === 'asc' ? left - right : right - left
+    })
+    return rows
+  }, [filteredMunicipalities, populationSort])
   const getValue = (label) => geography.find((item) => item.label === label)?.value ?? '—'
   const compareItems = compareNames.map((name) => municipalities.find((item) => item.municipality === name)).filter(Boolean)
   const toggleCompare = (name) => {
     setCompareNames((current) => current.includes(name) ? current.filter((item) => item !== name) : current.length < 2 ? [...current, name] : [current[1], name])
   }
+
+  useEffect(() => {
+    if (!selectedName) return
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById('municipality-profile')
+      if (!target) return
+      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [selectedName])
 
   return (
     <div className="locations-page">
@@ -87,15 +110,13 @@ export default function Locations() {
         <div className="container">
           <div className="locations-section-heading">
             <div>
-              <span className="eyebrow eyebrow-dark">MUNICIPALITY DIRECTORY</span>
+              <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><MapPin size={14} aria-hidden="true" /> MUNICIPALITY DIRECTORY</span>
               <h2>Explore the 23 municipalities.</h2>
               <p>
                 Select a municipality to view the exact population and religious affiliation counts contained in the supplied profile table.
               </p>
             </div>
-            <div className="locations-source-pill">
-              Source: {provincialProfile.religiousAffiliation.source}
-            </div>
+            <DataMeta year="2020" source={provincialProfile.religiousAffiliation.source} />
           </div>
 
           <div className="locations-search-wrap">
@@ -120,58 +141,109 @@ export default function Locations() {
             </Link>
           </div>
 
+          <Suspense fallback={<div className="real-map-loading" role="status">Loading interactive map…</div>}>
+            <PalawanMap onSelectMunicipality={setSelectedName} />
+          </Suspense>
+
+          <div className="locations-chart-grid">
+            <div className="locations-chart-card">
+              <div className="locations-chart-card-head">
+                <div>
+                  <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><BarChart3 size={14} aria-hidden="true" /> POPULATION RANKING</span>
+                  <h3>All 23 municipalities</h3>
+                  <p>Sortable population ranking using the supplied CBMS table values.</p>
+                </div>
+                <label className="locations-sort-control">
+                  <span className="locations-control-label"><SlidersHorizontal size={13} aria-hidden="true" /> Sort</span>
+                  <select value={populationSort} onChange={(event) => setPopulationSort(event.target.value)} aria-label="Sort municipality population">
+                    <option value="desc">Largest first</option>
+                    <option value="asc">Smallest first</option>
+                  </select>
+                </label>
+              </div>
+              <Suspense fallback={<div className="chart-empty" role="status">Loading population chart…</div>}>
+                <MunicipalityPopulationChart data={sortedPopulation} ariaLabel="Population ranking of all 23 Palawan municipalities" />
+              </Suspense>
+            </div>
+
+            <div className="locations-chart-card">
+              <div className="locations-chart-card-head">
+                <div>
+                  <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><Database size={14} aria-hidden="true" /> RELIGIOUS AFFILIATION</span>
+                  <h3>Municipalities at a glance</h3>
+                  <p>Each bar totals 100%; the remainder is shown as other / not reported.</p>
+                </div>
+                <label className="locations-sort-control">
+                  <span className="locations-control-label"><SlidersHorizontal size={13} aria-hidden="true" /> Sort by</span>
+                  <select value={religionSort} onChange={(event) => setReligionSort(event.target.value)} aria-label="Sort religion chart by category">
+                    {religionColumns.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                  </select>
+                </label>
+              </div>
+              <Suspense fallback={<div className="chart-empty" role="status">Loading religion chart…</div>}>
+                <ReligionStackedChart
+                  data={[...religionStackedData].sort((a, b) => (b[religionSort] ?? -1) - (a[religionSort] ?? -1))}
+                  ariaLabel="100 percent stacked religious affiliation chart across all 23 municipalities"
+                />
+              </Suspense>
+            </div>
+          </div>
+
           <div className="municipality-card-grid">
             {filteredMunicipalities.map((item, index) => (
-              <button
-                type="button"
+              <article
                 key={item.municipality}
                 className={`municipality-profile-card${selectedName === item.municipality ? ' is-selected' : ''}`}
-                onClick={() => setSelectedName(item.municipality)}
-                aria-pressed={selectedName === item.municipality}
               >
-                <span className="municipality-card-number">{String(index + 1).padStart(2, '0')}</span>
-                <span className="municipality-card-logo">
-                  {getMunicipalityLogo(item.municipality.replace(', Palawan', '')) ? (
-                    <img
-                      src={getMunicipalityLogo(item.municipality.replace(', Palawan', ''))}
-                      alt=""
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="municipality-card-logo-fallback">{item.municipality.charAt(0)}</span>
-                  )}
-                </span>
-                <span className="municipality-card-copy">
-                  <span className="municipality-card-name">{item.municipality.replace(', Palawan', '')}</span>
-                  <span className="municipality-card-location">{item.totalPopulation} reported population</span>
-                </span>
-                <span className="municipality-card-actions">
-                  <span
-                    role="checkbox"
-                    aria-checked={compareNames.includes(item.municipality)}
-                    tabIndex={0}
-                    className={`municipality-compare-toggle${compareNames.includes(item.municipality) ? ' is-active' : ''}`}
-                    onClick={(event) => { event.stopPropagation(); toggleCompare(item.municipality) }}
-                    onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); toggleCompare(item.municipality) } }}
-                  >
-                    Compare
+                <button
+                  type="button"
+                  className="municipality-card-main"
+                  onClick={() => setSelectedName(item.municipality)}
+                  aria-pressed={selectedName === item.municipality}
+                  aria-label={`View ${item.municipality.replace(', Palawan', '')} profile`}
+                >
+                  <span className="municipality-card-number">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="municipality-card-logo">
+                    {getMunicipalityLogo(item.municipality.replace(', Palawan', '')) ? (
+                      <img
+                        src={getMunicipalityLogo(item.municipality.replace(', Palawan', ''))}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <span className="municipality-card-logo-fallback">{item.municipality.charAt(0)}</span>
+                    )}
                   </span>
-                  <span className="municipality-card-arrow"><ArrowRight size={15} /></span>
+                  <span className="municipality-card-copy">
+                    <span className="municipality-card-name">{item.municipality.replace(', Palawan', '')}</span>
+                    <span className="municipality-card-location">{item.totalPopulation} reported population</span>
+                  </span>
+                </button>
+                <span className="municipality-card-actions">
+                  <button
+                    type="button"
+                    aria-pressed={compareNames.includes(item.municipality)}
+                    className={`municipality-compare-toggle${compareNames.includes(item.municipality) ? ' is-active' : ''}`}
+                    onClick={() => toggleCompare(item.municipality)}
+                  >
+                    <GitCompare size={12} aria-hidden="true" />
+                    Compare
+                  </button>
+                  <span className="municipality-card-arrow" aria-hidden="true"><ArrowRight size={15} /></span>
                 </span>
-              </button>
+              </article>
             ))}
           </div>
 
           {filteredMunicipalities.length === 0 && (
-            <div className="locations-empty">
-              No municipality matches “{query}”.
-            </div>
+            <StatusState compact title="No municipality found" description={`No municipality matches “${query}”.`} />
           )}
 
           <div className="municipality-compare-panel">
             <div className="municipality-compare-heading">
               <div>
-                <span className="eyebrow eyebrow-dark">SIDE-BY-SIDE VIEW</span>
+                <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><GitCompare size={14} aria-hidden="true" /> SIDE-BY-SIDE VIEW</span>
                 <h3>Compare two municipalities</h3>
                 <p>Select up to two cards using <strong>Compare</strong>. This view presents the supplied counts without ranking either municipality.</p>
               </div>
@@ -188,7 +260,7 @@ export default function Locations() {
                   <article key={item.municipality} className="municipality-compare-card">
                     <div className="municipality-compare-card-head">
                       <div className="municipality-compare-mini-logo">
-                        {getMunicipalityLogo(item.municipality.replace(', Palawan', '')) ? <img src={getMunicipalityLogo(item.municipality.replace(', Palawan', ''))} alt="" /> : item.municipality.charAt(0)}
+                        {getMunicipalityLogo(item.municipality.replace(', Palawan', '')) ? <img src={getMunicipalityLogo(item.municipality.replace(', Palawan', ''))} alt="" loading="lazy" decoding="async" /> : item.municipality.charAt(0)}
                       </div>
                       <div>
                         <span className="eyebrow eyebrow-dark">MUNICIPALITY</span>
@@ -199,11 +271,20 @@ export default function Locations() {
                       <span>Reported population</span>
                       <strong>{item.totalPopulation}</strong>
                     </div>
+                    <div className="municipality-compare-chart">
+                      <Suspense fallback={<div className="chart-empty" role="status">Loading chart…</div>}>
+                        <DonutChart
+                          data={buildReligionDonutData(item)}
+                          height={260}
+                          ariaLabel={`${cleanMunicipalityName(item.municipality)} religious affiliation distribution`}
+                        />
+                      </Suspense>
+                    </div>
                     <div className="municipality-compare-metrics">
                       {religionColumns.slice(0, 4).map(([key, label]) => (
                         <div key={key}>
                           <span>{label}</span>
-                          <strong>{item[key]}</strong>
+                          <strong>{item[key] ?? '—'}</strong>
                         </div>
                       ))}
                     </div>
@@ -216,7 +297,7 @@ export default function Locations() {
       </section>
 
       {selected && (
-        <section className="section section-soft municipality-detail-section">
+        <section id="municipality-profile" className="section section-soft municipality-detail-section">
           <div className="container">
             <div className="municipality-detail-card">
               <div className="municipality-detail-heading">
@@ -226,13 +307,15 @@ export default function Locations() {
                       <img
                         src={getMunicipalityLogo(selected.municipality.replace(', Palawan', ''))}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <span>{selected.municipality.charAt(0)}</span>
                     )}
                   </div>
                   <div className="municipality-detail-title">
-                    <span className="eyebrow eyebrow-dark">MUNICIPALITY PROFILE</span>
+                    <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><MapPin size={14} aria-hidden="true" /> MUNICIPALITY PROFILE</span>
                     <h2>{selected.municipality.replace(', Palawan', '')}</h2>
                     <p>Municipal emblem and profile figures from the supplied provincial data.</p>
                     <div className="municipality-detail-meta">
@@ -254,10 +337,10 @@ export default function Locations() {
                 <div className="municipality-population-scale">
                   <div className="municipality-scale-label">
                     <span>Population scale within the 23 listed municipalities</span>
-                    <strong>{Math.round((toNumber(selected.totalPopulation) / maxPopulation) * 100)}%</strong>
+                    <strong>{Math.round(((Number(String(selected.totalPopulation ?? 0).replace(/,/g, '')) || 0) / maxPopulation) * 100)}%</strong>
                   </div>
                   <div className="municipality-scale-track">
-                    <span style={{ width: `${Math.max(3, (toNumber(selected.totalPopulation) / maxPopulation) * 100)}%` }} />
+                    <span style={{ width: `${Math.max(3, ((Number(String(selected.totalPopulation ?? 0).replace(/,/g, '')) || 0) / maxPopulation) * 100)}%` }} />
                   </div>
                   <small>Relative visual scale only; it is not a population ranking.</small>
                 </div>
@@ -288,29 +371,36 @@ export default function Locations() {
 
               <div className="municipality-detail-section-title">
                 <div>
-                  <span className="eyebrow eyebrow-dark">REPORTED CATEGORIES</span>
+                  <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><FileText size={14} aria-hidden="true" /> REPORTED CATEGORIES</span>
                   <h3>Religious affiliation counts</h3>
                 </div>
                 <small>Counts shown exactly as supplied.</small>
               </div>
 
-              <div className="municipality-religion-grid municipality-religion-bars">
-                {religionColumns.map(([key, label]) => {
-                  const maxReligion = Math.max(...religionColumns.map(([religionKey]) => toNumber(selected[religionKey])), 1)
-                  const value = toNumber(selected[key])
-                  const width = value === 0 ? 0 : Math.max(4, (value / maxReligion) * 100)
-                  return (
-                    <article key={key}>
-                      <div className="municipality-religion-head">
-                        <span>{label}</span>
-                        <strong>{value}</strong>
-                      </div>
-                      <div className="municipality-religion-track" aria-hidden="true">
-                        <span style={{ width: `${width}%` }} />
-                      </div>
-                    </article>
-                  )
-                })}
+              <div className="municipality-selected-religion-table">
+                {selectedReligionData.map((entry) => (
+                  <div key={entry.name}>
+                    <span>{entry.name}</span>
+                    <strong>{entry.value === null ? '—' : entry.value.toLocaleString('en-US')}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className="municipality-selected-religion-chart">
+                <div className="municipality-detail-section-title">
+                  <div>
+                    <span className="eyebrow eyebrow-dark locations-eyebrow-icon"><BarChart3 size={14} aria-hidden="true" /> RELIGION MIX</span>
+                    <h3>Religious affiliation distribution</h3>
+                  </div>
+                  <small>Counts are converted to shares of the supplied municipal total.</small>
+                </div>
+                <Suspense fallback={<div className="chart-empty" role="status">Loading religion chart…</div>}>
+                  <DonutChart
+                    data={selectedReligionData}
+                    height={300}
+                    ariaLabel={`${cleanMunicipalityName(selected.municipality)} religious affiliation distribution`}
+                  />
+                </Suspense>
               </div>
 
               <div className="municipality-detail-actions">
@@ -321,7 +411,7 @@ export default function Locations() {
               </div>
 
               <div className="municipality-detail-footer">
-                <span>Source: {provincialProfile.religiousAffiliation.source}</span>
+                <DataMeta year="2020" source={provincialProfile.religiousAffiliation.source} />
                 <Link to="/profile#religious-affiliation">
                   View full table <ArrowRight size={15} />
                 </Link>

@@ -4,7 +4,7 @@ const municipalityLogoFiles = {
   Araceli: 'araceli.png',
   Balabac: 'balabac.png',
   Bataraza: 'bataraza.png',
-  "Brooke's Point": 'brookes-point.png',
+  "Brooke's Point": 'brookes-point.webp',
   Busuanga: 'busuanga.png',
   Cagayancillo: 'cagayancillo.png',
   Coron: 'coron.png',
